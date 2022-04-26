@@ -21,7 +21,6 @@ using namespace std;
 
 Vector3D load_texture(int frame_idx, GLuint handle, const char* where) {
   Vector3D size_retval;
-  
   if (strlen(where) == 0) return size_retval;
   
   glActiveTexture(GL_TEXTURE0 + frame_idx);

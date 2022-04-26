@@ -37,17 +37,43 @@ void Cloth::buildGrid() {
   vector<int>::iterator start_pt;
   double w_offset = width/num_width_points;
   double h_offset = height/num_height_points;
+
+  Vector3D origin = Vector3D();
+  double r = 1;
+
   for (int h = 0; h < num_height_points; h++) {
       for (int w = 0; w < num_width_points; w++) {
           Vector3D pos;
-          if (orientation == HORIZONTAL) {
-              pos = Vector3D(w_offset * w, 1, h_offset * h);
+          // y does not change.
+          // x and z do change. -1 <= z <= 1
+          double x;
+          double y = h_offset * h;
+          double z;
+          if (w < ((float)(num_width_points / 4))) {
+              x = w * w_offset; // takes us to width / 4
+              z = 0;
+          }
+          else if (w < ((float)(num_width_points / 2))) {
+              x = width / 4;
+              z = (w * w_offset - width / 4);
+          }
+          else if (w < ((float)(3 * num_width_points / 4))) {
+              x = (width / 4) - ((w * w_offset - width / 2));
+              z = width / 4;
           }
           else {
-              double offset = (double)rand() / (500.0 * RAND_MAX) - (1.0 / 1000.0);
-              pos = Vector3D(w_offset * w, h_offset * h, offset);
+              x = 0;
+              z = (width / 4) - (w * w_offset - 3 * width / 4);
           }
-          point_masses.emplace_back(PointMass(pos, false));
+
+         pos = Vector3D(x, y, z);
+          if (w == 0 || w == num_width_points / 4 || w == num_width_points / 2
+                        || w == 3 * num_width_points / 4 || w == num_width_points - 1) {
+              point_masses.emplace_back(PointMass(pos, true));
+          } else {
+              point_masses.emplace_back(PointMass(pos, false));
+          }
+
       }
   }
 
