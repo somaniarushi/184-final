@@ -39,43 +39,54 @@ void Cloth::buildGrid() {
   double h_offset = height/num_height_points;
 
   Vector3D origin = Vector3D();
-  double r = 1;
+  double r = width / 4;
+
+  double incr_amt = (2 * PI) / num_width_points;
 
   for (int h = 0; h < num_height_points; h++) {
-      for (int w = 0; w < num_width_points; w++) {
+      for (double angle = 0; angle <= 2 * PI; angle += incr_amt) {
           Vector3D pos;
-          // y does not change.
-          // x and z do change. -1 <= z <= 1
-          double x;
-          double y = h_offset * h;
-          double z;
-          if (w < ((float)(num_width_points / 4))) {
-              x = w * w_offset; // takes us to width / 4
-              z = 0;
-          }
-          else if (w < ((float)(num_width_points / 2))) {
-              x = width / 4;
-              z = (w * w_offset - width / 4);
-          }
-          else if (w < ((float)(3 * num_width_points / 4))) {
-              x = (width / 4) - ((w * w_offset - width / 2));
-              z = width / 4;
-          }
-          else {
-              x = 0;
-              z = (width / 4) - (w * w_offset - 3 * width / 4);
+          double x = r * sin(angle);
+          double z = r * cos(angle);
+
+          if (angle >= 2 * PI - incr_amt) {
+              x = r * sin(0) + 0.0001;
+              z = r * cos(0) + 0.0001;
           }
 
-         pos = Vector3D(x, y, z);
-          if (w == 0 || w == num_width_points / 4 || w == num_width_points / 2
-                        || w == 3 * num_width_points / 4 || w == num_width_points - 1) {
+          pos = Vector3D(x, h_offset * h, z);
+          if (angle == 0 || angle >= 2 * PI - incr_amt || z == 0 || z == 0.0001 || h == 0 || h == num_height_points - 1) {
               point_masses.emplace_back(PointMass(pos, true));
           } else {
               point_masses.emplace_back(PointMass(pos, false));
           }
-
       }
   }
+
+
+
+//  for (int h = 0; h < num_height_points; h++) {
+//      for (int w = 0; w < num_width_points; w++) {
+//          Vector3D pos;
+//          // y does not change.
+//          // x and z do change. -1 <= z <= 1
+//          double x;
+//          double y = h_offset * h;
+//          double z;
+//          x = r * sin(w * w_offset);
+//          z = r * cos(w * w_offset);
+//
+//         pos = Vector3D(x, y, z);
+////          if (w == 0 || w == num_width_points / 4 || w == num_width_points / 2
+////                        || w == 3 * num_width_points / 4 || w == num_width_points - 1) {
+////              point_masses.emplace_back(PointMass(pos, true));
+////          } else {
+////              point_masses.emplace_back(PointMass(pos, false));
+////          }
+//          point_masses.emplace_back(PointMass(pos, false));
+//      }
+//
+//  }
 
   for (int i = 0; i < pinned.size(); i++) {
       vector<int> xy = pinned[i];
