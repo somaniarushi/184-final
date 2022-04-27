@@ -72,3 +72,6 @@ This week, we went to office hours to check-in on our progress with TAs who gave
 [](http://)[TA Feedback](https://docs.google.com/document/d/1ixCnejDpCs4ehfYdg3bs965VQ3QEcITUs65Pfs1OX9M/edit)
 [Repository](https://github.com/somaniarushi/184-final.git)
 
+
+## Slides!
+Link [here](https://docs.google.com/presentation/d/1AVXhw1rygKwHzyE5RwmPW3Jedo3_5Xamv6ygRoUikg4/edit?usp=sharing)
