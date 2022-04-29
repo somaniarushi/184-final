@@ -42,21 +42,31 @@ void Cloth::buildGrid() {
     double r = width / 4;
 
     double incr_amt = (2 * PI) / num_width_points;
-    //make cocentric circles?
+    //bottom
     for (double r2 = 0; r2 <= r; r2 += .01) {
-        for (double angle = 0; angle <= 2 * PI; angle += PI / 4) {
+        for (double angle = 0; angle <= 2 * PI; angle += incr_amt) {
             Vector3D pos;
             double x = r2 * sin(angle);
             double z = r2 * cos(angle);
+            if (angle >= 2 * PI - incr_amt) {
+                x = r * sin(0) + 0.0001;
+                z = r * cos(0) + 0.0001;
+            }
 
             pos = Vector3D(x, 0, z);
-            //fix the bottom of the tube, center point only i think?
 
-            point_masses.emplace_back(PointMass(pos, false));
+            //fix the bottom of the tube, center point only i think? this is anchor
+            if (r2 == 0)
+                point_masses.emplace_back(PointMass(pos, true));
+
+            else {
+                point_masses.emplace_back(PointMass(pos, false));
+            }
+
         }
     }
-
-    for (int h = 0; h < num_height_points; h++) {
+    //tube
+    for (int h = 1; h < num_height_points + 1; h++) {
         for (double angle = 0; angle <= 2 * PI; angle += incr_amt) {
             Vector3D pos;
             double x = r * sin(angle);
@@ -68,15 +78,25 @@ void Cloth::buildGrid() {
             }
             //do the same thing for th
             pos = Vector3D(x, h_offset * h, z);
-            if (angle == 0 || angle >= 2 * PI - incr_amt || z == 0 || z == 0.0001 || h == 0 || h == num_height_points - 1) {
-                point_masses.emplace_back(PointMass(pos, true));
-            }
-            else {
-                point_masses.emplace_back(PointMass(pos, false));
-            }
+            point_masses.emplace_back(PointMass(pos, false));
             //if top or bottom fill with points
+        }
+    }
+    //top
+    for (double r2 = 0; r2 <= r; r2 += .01) {
+        for (double angle = 0; angle <= 2 * PI; angle += incr_amt) {
+            Vector3D pos;
+            double x = r2 * sin(angle);
+            double z = r2 * cos(angle);
+            if (angle >= 2 * PI - incr_amt) {
+                x = r * sin(0) + 0.0001;
+                z = r * cos(0) + 0.0001;
+            }
 
+            pos = Vector3D(x, (num_height_points + 1) * h_offset, z);
 
+            //fix the bottom of the tube, center point only i think?
+            point_masses.emplace_back(PointMass(pos, false));
         }
     }
 
@@ -171,6 +191,7 @@ void Cloth::simulate(double frames_per_sec, double simulation_steps, ClothParame
     for (PointMass& pointMass : point_masses) {
         pointMass.forces = externalForce;
     }
+
     //Next, apply the spring correction forces. For each spring, skip over the spring if that spring's constraint type is currently disabled. You can check this using cp, which has boolean values such as enable_structural_constraints. Otherwise, compute the force applied to the two masses on its ends using Hooke's law:
 
 
@@ -206,6 +227,7 @@ void Cloth::simulate(double frames_per_sec, double simulation_steps, ClothParame
             pointMass.position = pointMass.position + v + pointMass.forces * delta_t * delta_t / mass;
         }
     }
+
 
 
 
