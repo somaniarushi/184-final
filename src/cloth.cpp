@@ -42,6 +42,19 @@ void Cloth::buildGrid() {
     double r = width / 4;
 
     double incr_amt = (2 * PI) / num_width_points;
+    //make cocentric circles?
+    for (double r2 = 0; r2 <= r; r2 += .01) {
+        for (double angle = 0; angle <= 2 * PI; angle += PI / 4) {
+            Vector3D pos;
+            double x = r2 * sin(angle);
+            double z = r2 * cos(angle);
+
+            pos = Vector3D(x, 0, z);
+            //fix the bottom of the tube, center point only i think?
+
+            point_masses.emplace_back(PointMass(pos, false));
+        }
+    }
 
     for (int h = 0; h < num_height_points; h++) {
         for (double angle = 0; angle <= 2 * PI; angle += incr_amt) {
@@ -62,28 +75,7 @@ void Cloth::buildGrid() {
                 point_masses.emplace_back(PointMass(pos, false));
             }
             //if top or bottom fill with points
-            if (h == 0 || h == num_height_points) {
-                std::cout << "eep" << "\n";
-                //.001 is dummy incremenet for now
-                for (double r2 = 0; r2 < r; r += .001) {
-                    Vector3D pos;
-                    double x = r2 * sin(angle);
-                    double z = r2 * cos(angle);
 
-                    if (angle >= 2 * PI - incr_amt) {
-                        x = r2 * sin(0) + 0.0001;
-                        z = r2 * cos(0) + 0.0001;
-                    }
-                    pos = Vector3D(x, h_offset * h, z);
-                    //fix the bottom of the tube, center point only i think?
-                    if (r2 == 0 && h == 0) {
-                        point_masses.emplace_back(PointMass(pos, true));
-                    }
-                    else {
-                        point_masses.emplace_back(PointMass(pos, false));
-                    }
-                }
-            }
 
         }
     }
