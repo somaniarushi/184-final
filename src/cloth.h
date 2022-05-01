@@ -71,6 +71,7 @@ struct Cloth {
   // Cloth components
   vector<PointMass> point_masses;
   vector<vector<int>> pinned;
+  //vector<Rod> rods;
   vector<Spring> springs;
   ClothMesh *clothMesh;
 

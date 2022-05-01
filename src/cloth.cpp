@@ -24,7 +24,7 @@ Cloth::Cloth(double width, double height, int num_width_points,
 Cloth::~Cloth() {
     point_masses.clear();
     springs.clear();
-
+    //rods.clear();
     if (clothMesh) {
         delete clothMesh;
     }
@@ -41,7 +41,7 @@ void Cloth::buildGrid() {
     Vector3D origin = Vector3D();
     double r = width / 4;
 
-    double incr_amt = (2 * PI) / num_width_points;
+    double incr_amt = (double)(2.0 * PI) / num_width_points;
     //bottom
     for (double r2 = 0; r2 <= r; r2 += .01) {
         for (double angle = 0; angle <= 2 * PI; angle += incr_amt) {
@@ -131,6 +131,8 @@ void Cloth::buildGrid() {
         point_masses[index].pinned = true;
     }
 
+
+
     //structural, shear, and bending constraints between point masses
     for (int h_count = 0; h_count < num_height_points; h_count += 1) {
         for (int w_count = 0; w_count < num_width_points; w_count += 1) {
@@ -175,6 +177,13 @@ void Cloth::buildGrid() {
             }
         }
     }
+    //rod stuff
+    Vector3D currP = origin; 
+    for (int i = 0; i <= num_height_points; i += h_offset) {
+        //create new rod for hoffset length
+        rods.emplace_back(Rod(currP, currP + Vector3D(0, currP.y + h_offset, 0)));
+        currP.y += h_offset;
+    }
 }
 
 void Cloth::simulate(double frames_per_sec, double simulation_steps, ClothParameters* cp,
@@ -209,8 +218,11 @@ void Cloth::simulate(double frames_per_sec, double simulation_steps, ClothParame
             s.pm_b->forces -= springForce;
         }
     }
-
-
+    //the idea
+    //iterate over rods, start w first being pinned
+    // apply torque on rod using rod.h, make force proportional to torque
+    // at each time step, pin the next rod til all pinned
+    // when all pinned, go backwards, unpin, apply torque
     // TODO (Part 2): Use Verlet integration to compute new point mass positions
     for (PointMass& pointMass : point_masses) {
         if (!pointMass.pinned) {
@@ -223,6 +235,8 @@ void Cloth::simulate(double frames_per_sec, double simulation_steps, ClothParame
             Vector3D inside = dot(normal, windDirV - v) * normal;
             Vector3D windForce = consC * inside;
             pointMass.forces += windForce;
+
+            
             pointMass.last_position = pointMass.position;
             pointMass.position = pointMass.position + v + pointMass.forces * delta_t * delta_t / mass;
         }
