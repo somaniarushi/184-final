@@ -1,0 +1,15 @@
+# ninja log v5
+59	751	6728793916985647	ext/nanogui/ext_build/glfw/src/CMakeFiles/glfw_objects.dir/window.c.obj	7a3604e61e779b88
+37	763	6728793917005670	ext/nanogui/ext_build/glfw/src/CMakeFiles/glfw_objects.dir/monitor.c.obj	a20cb82e77c23d29
+32	767	6728793917125747	ext/nanogui/ext_build/glfw/src/CMakeFiles/glfw_objects.dir/context.c.obj	c912b29b432ae3ec
+28	759	6728793917035689	ext/nanogui/ext_build/glfw/src/CMakeFiles/glfw_objects.dir/input.c.obj	78c3dc60d551c894
+44	761	6728793916965668	ext/nanogui/ext_build/glfw/src/CMakeFiles/glfw_objects.dir/win32_time.c.obj	76ded59ea2126c98
+54	764	6728793917035689	ext/nanogui/ext_build/glfw/src/CMakeFiles/glfw_objects.dir/win32_monitor.c.obj	eaaafe575b7630e5
+23	765	6728793917135706	ext/nanogui/ext_build/glfw/src/CMakeFiles/glfw_objects.dir/init.c.obj	eaa96c5433d41a03
+64	768	6728793917045721	ext/nanogui/ext_build/glfw/src/CMakeFiles/glfw_objects.dir/win32_init.c.obj	1aef8838f2283ac8
+50	775	6728793917215672	ext/nanogui/ext_build/glfw/src/CMakeFiles/glfw_objects.dir/vulkan.c.obj	3611f134a545493f
+38	1507	6728832599910231	ext/nanogui/ext_build/glfw/src/CMakeFiles/glfw_objects.dir/win32_tls.c.obj	367a4d60dd067cf1
+73	1510	6728832599940222	ext/nanogui/ext_build/glfw/src/CMakeFiles/glfw_objects.dir/wgl_context.c.obj	8e5a00edf579d3d0
+65	1518	6728832599970224	ext/nanogui/ext_build/glfw/src/CMakeFiles/glfw_objects.dir/win32_window.c.obj	92513bc861ae5284
+27	1525	6728832600030209	ext/nanogui/ext_build/glfw/src/CMakeFiles/glfw_objects.dir/win32_joystick.c.obj	c760bf8d0329760e
+48	1522	6728832599930220	ext/nanogui/ext_build/glfw/src/CMakeFiles/glfw_objects.dir/egl_context.c.obj	df6e236b758ad3a1
