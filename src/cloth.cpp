@@ -43,14 +43,14 @@ void Cloth::buildGrid() {
 
     double incr_amt = (double)(2.0 * PI) / num_width_points;
     //bottom
-    for (double r2 = 0; r2 <= r; r2 += .01) {
-        for (double angle = 0; angle <= 2 * PI; angle += incr_amt) {
+    for (double r2 = 0; r2 <= r; r2 += .03) {
+        for (double angle = 0; angle <= 2.0 * PI; angle += incr_amt) {
             Vector3D pos;
             double x = r2 * sin(angle);
             double z = r2 * cos(angle);
             if (angle >= 2 * PI - incr_amt) {
-                x = r * sin(0) + 0.0001;
-                z = r * cos(0) + 0.0001;
+                x = r2 * sin(0);
+                z = r2 * cos(0);
             }
 
             pos = Vector3D(x, 0, z);
@@ -66,7 +66,7 @@ void Cloth::buildGrid() {
         }
     }
     //tube
-    for (int h = 1; h < num_height_points + 1; h++) {
+    for (int h = 1; h < num_height_points; h++) {
         for (double angle = 0; angle <= 2 * PI; angle += incr_amt) {
             Vector3D pos;
             double x = r * sin(angle);
@@ -83,8 +83,9 @@ void Cloth::buildGrid() {
         }
     }
     //top
-    for (double r2 = 0; r2 <= r; r2 += .01) {
+    for (double r2 = 0; r2 <= r; r2 += .03) {
         for (double angle = 0; angle <= 2 * PI; angle += incr_amt) {
+            std::cout << "e" << "\n";
             Vector3D pos;
             double x = r2 * sin(angle);
             double z = r2 * cos(angle);
@@ -93,37 +94,13 @@ void Cloth::buildGrid() {
                 z = r * cos(0) + 0.0001;
             }
 
-            pos = Vector3D(x, (num_height_points + 1) * h_offset, z);
+            pos = Vector3D(x, (num_height_points)*h_offset, z);
 
             //fix the bottom of the tube, center point only i think?
             point_masses.emplace_back(PointMass(pos, false));
         }
     }
 
-
-
-    //  for (int h = 0; h < num_height_points; h++) {
-    //      for (int w = 0; w < num_width_points; w++) {
-    //          Vector3D pos;
-    //          // y does not change.
-    //          // x and z do change. -1 <= z <= 1
-    //          double x;
-    //          double y = h_offset * h;
-    //          double z;
-    //          x = r * sin(w * w_offset);
-    //          z = r * cos(w * w_offset);
-    //
-    //         pos = Vector3D(x, y, z);
-    ////          if (w == 0 || w == num_width_points / 4 || w == num_width_points / 2
-    ////                        || w == 3 * num_width_points / 4 || w == num_width_points - 1) {
-    ////              point_masses.emplace_back(PointMass(pos, true));
-    ////          } else {
-    ////              point_masses.emplace_back(PointMass(pos, false));
-    ////          }
-    //          point_masses.emplace_back(PointMass(pos, false));
-    //      }
-    //
-    //  }
 
     for (int i = 0; i < pinned.size(); i++) {
         vector<int> xy = pinned[i];
@@ -200,10 +177,12 @@ void Cloth::simulate(double frames_per_sec, double simulation_steps, ClothParame
     for (PointMass& pointMass : point_masses) {
         pointMass.forces = externalForce;
     }
+    for (Rod rod : rods) {
+        rod.point0.forces = externalForce;
+        rod.point1.forces = externalForce;
+    }
 
     //Next, apply the spring correction forces. For each spring, skip over the spring if that spring's constraint type is currently disabled. You can check this using cp, which has boolean values such as enable_structural_constraints. Otherwise, compute the force applied to the two masses on its ends using Hooke's law:
-
-
     for (Spring s : springs) {
         if ((s.spring_type == STRUCTURAL && cp->enable_structural_constraints)
             || (s.spring_type == SHEARING && cp->enable_shearing_constraints)
@@ -218,12 +197,73 @@ void Cloth::simulate(double frames_per_sec, double simulation_steps, ClothParame
             s.pm_b->forces -= springForce;
         }
     }
-    //the idea
-    //iterate over rods, start w first being pinned
-    // apply torque on rod using rod.h, make force proportional to torque
-    // at each time step, pin the next rod til all pinned
-    // when all pinned, go backwards, unpin, apply torque
-    // TODO (Part 2): Use Verlet integration to compute new point mass positions
+    //ROD STUFF
+    //find the forces acting on the rods (just wind for now) 
+    for (Rod rod: rods) {
+        float consC = 0.5;
+        Vector3D windDirV = Vector3D(1, 1, 1);
+        Vector3D v0 = (1 - cp->damping / 100) * (rod.point0.position - rod.point0.last_position);
+        Vector3D normal0 = rod.point0.normal();
+        Vector3D inside0 = dot(normal0, windDirV - v0) * normal0;
+        Vector3D windForce0 = consC * inside0;
+        rod.point0.forces += windForce0;
+        rod.point0.last_position = rod.point0.position;
+        rod.point0.position = rod.point0.position + v0 + rod.point0.forces * delta_t * delta_t / mass;
+
+
+        Vector3D v1 = (1 - cp->damping / 100) * (rod.point1.position - rod.point1.last_position);
+        Vector3D normal1 = rod.point1.normal();
+        Vector3D inside1 = dot(normal1, windDirV - v1) * normal1;
+        Vector3D windForce1 = consC * inside1;
+        rod.point1.forces += windForce1;
+        rod.point1.last_position = rod.point1.position;
+        rod.point1.position = rod.point1.position + v1 + rod.point1.forces * delta_t * delta_t / mass;
+    }
+    bool unpinExists = false;
+    Vector3D torqueForceAdd = Vector3D(0,0,0);
+    int step = 0; 
+    int start = -1;
+    int end = -1;
+    if (directionUp) {
+        step = 1; 
+        start = 0;
+        end = rods.size();
+    }
+    else {
+        step = -1; 
+        start = rods.size() - 1;
+        end = 0;
+    }
+    int ind = start; 
+    for (; ind < end; ind += step) {
+        Rod curr = rods[ind];
+        //find last pinned rod
+        //first
+        if (!curr.pinned) {
+            unpinExists = true;
+            Vector3D fT;
+            int next = -1;
+            if (ind >= 1 && ind < rods.size() - 1 && directionUp) {
+                curr.pivotPt = curr.point1;
+                fT = curr.point1.forces;
+                next = ind + 1;
+            }
+            else if (ind >= 1) {
+                fT = curr.point0.forces;
+                curr.pivotPt = curr.point0;
+                next = ind - 1;
+            }
+
+            torqueForceAdd = curr.forceTorque(rods[next]) * fT;
+            break; 
+        }
+    }
+    if (!unpinExists) {
+        //the crease has traversed the whole way, now flip
+        rods[ind].pinned = false;
+        directionUp = !directionUp;
+    }
+
     for (PointMass& pointMass : point_masses) {
         if (!pointMass.pinned) {
             Vector3D v = (1 - cp->damping / 100) * (pointMass.position - pointMass.last_position);
@@ -235,8 +275,10 @@ void Cloth::simulate(double frames_per_sec, double simulation_steps, ClothParame
             Vector3D inside = dot(normal, windDirV - v) * normal;
             Vector3D windForce = consC * inside;
             pointMass.forces += windForce;
-
-            
+            //ROD STUFF 
+            if (!(torqueForceAdd==Vector3D(0,0,0))){
+                pointMass.forces += torqueForceAdd;
+            }
             pointMass.last_position = pointMass.position;
             pointMass.position = pointMass.position + v + pointMass.forces * delta_t * delta_t / mass;
         }

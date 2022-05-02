@@ -10,7 +10,7 @@
 #include "clothMesh.h"
 #include "collision/collisionObject.h"
 #include "spring.h"
-
+#include "rod.h"
 using namespace CGL;
 using namespace std;
 
@@ -71,9 +71,10 @@ struct Cloth {
   // Cloth components
   vector<PointMass> point_masses;
   vector<vector<int>> pinned;
-  //vector<Rod> rods;
+  vector<Rod> rods;
   vector<Spring> springs;
   ClothMesh *clothMesh;
+  bool directionUp = true;
 
   // Spatial hashing
   unordered_map<float, vector<PointMass *> *> map;
