@@ -46,16 +46,16 @@ void Cloth::buildGrid() {
   for (int h = 0; h < num_height_points; h++) {
       for (double angle = 0; angle <= 2 * PI; angle += incr_amt) {
           Vector3D pos;
-          double x = r * sin(angle);
+          double y = r * sin(angle);
           double z = r * cos(angle);
 
           if (angle >= 2 * PI - incr_amt) {
-              x = r * sin(0) + 0.0001;
+              y = r * sin(0) + 0.0001;
               z = r * cos(0) + 0.0001;
           }
 
-          pos = Vector3D(x, h_offset * h, z);
-          if (angle == 0 || angle >= 2 * PI - incr_amt || z == 0 || z == 0.0001 || h == 0 || h == num_height_points - 1) {
+          pos = Vector3D(h_offset * h, y, z);
+          if (h == 0) {
               point_masses.emplace_back(PointMass(pos, true));
           } else {
               point_masses.emplace_back(PointMass(pos, false));
