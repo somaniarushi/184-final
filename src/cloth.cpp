@@ -167,13 +167,13 @@ void Cloth::simulate(double frames_per_sec, double simulation_steps, ClothParame
   double delta_t = 1.0f / frames_per_sec / simulation_steps;
 
   // TODO (Part 2): Compute total force acting on each point mass.
-  Vector3D externalForce;
-  for (Vector3D &accel : external_accelerations) {
-    externalForce += (mass * accel);
+  Vector3D gravity = external_accelerations[0];
+  Vector3D wind = external_accelerations[1];
+
+    for (PointMass &pointMass : point_masses) {
+    pointMass.forces = mass * gravity;
   }
-  for (PointMass &pointMass : point_masses) {
-    pointMass.forces = externalForce;
-  }
+
   //Next, apply the spring correction forces. For each spring, skip over the spring if that spring's constraint type is currently disabled. You can check this using cp, which has boolean values such as enable_structural_constraints. Otherwise, compute the force applied to the two masses on its ends using Hooke's law:
 
 
@@ -201,7 +201,7 @@ void Cloth::simulate(double frames_per_sec, double simulation_steps, ClothParame
           //represents strength of wind
           float consC = 0.5;
           //can change this, maybe put in cloth params
-          Vector3D windDirV = Vector3D(7, 1, 1);
+          Vector3D windDirV = wind;
           Vector3D inside = dot(normal, windDirV - v) * normal;
           Vector3D windForce = consC * inside;
           pointMass.forces += windForce;

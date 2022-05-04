@@ -40,12 +40,12 @@ private:
   void drawWireframe(GLShader &shader);
   void drawNormals(GLShader &shader);
   void drawPhong(GLShader &shader);
-  
+
   void load_shaders();
   void load_textures();
-  
+
   // File management
-  
+
   std::string m_project_root;
 
   GLuint vbo;
@@ -63,6 +63,7 @@ private:
   int simulation_steps = 30;
 
   CGL::Vector3D gravity = CGL::Vector3D(0, -9.8, 0);
+  CGL::Vector3D wind = CGL::Vector3D(10, 1, 1);
   nanogui::Color color = nanogui::Color(1.0f, 1.0f, 1.0f, 1.0f);
 
   Cloth *cloth;
@@ -75,9 +76,9 @@ private:
 
   vector<UserShader> shaders;
   vector<std::string> shaders_combobox_names;
-  
+
   // OpenGL textures
-  
+
   Vector3D m_gl_texture_1_size;
   Vector3D m_gl_texture_2_size;
   Vector3D m_gl_texture_3_size;
@@ -87,9 +88,9 @@ private:
   GLuint m_gl_texture_3;
   GLuint m_gl_texture_4;
   GLuint m_gl_cubemap_tex;
-  
+
   // OpenGL customizable inputs
-  
+
   double m_normal_scaling = 2.0;
   double m_height_scaling = 0.1;
 
@@ -145,11 +146,11 @@ struct UserShader {
   , nanogui_shader(nanogui_shader)
   , type_hint(type_hint) {
   }
-  
+
   std::shared_ptr<GLShader> nanogui_shader;
   std::string display_name;
   ShaderTypeHint type_hint;
-  
+
 };
 
 #endif // CGL_CLOTH_SIM_H
