@@ -49,7 +49,7 @@ void Cloth::buildGrid() {
           double y = r * sin(angle);
           double z = r * cos(angle);
 
-          if (angle >= 2 * PI - incr_amt) {
+          if (angle >= 2 * PI - incr_amt +1) {
               y = r * sin(0) + 0.0001;
               z = r * cos(0) + 0.0001;
           }
@@ -106,6 +106,7 @@ void Cloth::buildGrid() {
             PointMass *m2 = &point_masses[index-1];
             springs.emplace_back(Spring(m1, m2, STRUCTURAL));
           }
+
             //above
           if (h_count > 0) {
             PointMass *m2 = &point_masses[index-num_width_points];
@@ -136,6 +137,24 @@ void Cloth::buildGrid() {
               PointMass *m2 = &point_masses[index-(num_width_points*2)];
               springs.emplace_back(Spring(m1, m2, BENDING));
           }
+
+          // TUBE EXCEPTIONS
+          if (w_count  == 0) {
+            springs.emplace_back(Spring(m1, m1+num_width_points-1, STRUCTURAL));
+            if (h_count > 0) {
+              springs.emplace_back(Spring(m1, m1 + num_width_points - 1 - num_width_points, SHEARING));
+            }
+            if (h_count < num_height_points - 1) {
+              springs.emplace_back(Spring(m1, m1 + num_width_points - 1 + num_width_points, SHEARING));
+            }
+
+            springs.emplace_back(Spring(m1, m1+num_width_points-2, BENDING));
+          }
+
+          if (w_count == 1) {
+            springs.emplace_back(Spring(m1, m1+num_width_points-2, BENDING));
+          }
+
       }
   }
 }
@@ -181,7 +200,7 @@ void Cloth::simulate(double frames_per_sec, double simulation_steps, ClothParame
           //represents strength of wind
           float consC = 0.5;
           //can change this, maybe put in cloth params
-          Vector3D windDirV = Vector3D(1, 1, 1);
+          Vector3D windDirV = Vector3D(10, 1, 1);
           Vector3D inside = dot(normal, windDirV - v) * normal;
           Vector3D windForce = consC * inside;
           pointMass.forces += windForce;
