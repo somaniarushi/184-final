@@ -49,7 +49,7 @@ void Cloth::buildGrid() {
           double y = r * sin(angle);
           double z = r * cos(angle);
 
-          if (angle >= 2 * PI - incr_amt +1) {
+          if (angle >= 2 * PI - incr_amt) {
               y = r * sin(0) + 0.0001;
               z = r * cos(0) + 0.0001;
           }
