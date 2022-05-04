@@ -44,6 +44,7 @@ void Cloth::buildGrid() {
   double incr_amt = (2 * PI) / num_width_points;
 
   for (int h = 0; h < num_height_points; h++) {
+      r -= 0.002;
       for (double angle = 0; angle <= 2 * PI; angle += incr_amt) {
           Vector3D pos;
           double y = r * sin(angle);
@@ -200,7 +201,7 @@ void Cloth::simulate(double frames_per_sec, double simulation_steps, ClothParame
           //represents strength of wind
           float consC = 0.5;
           //can change this, maybe put in cloth params
-          Vector3D windDirV = Vector3D(10, 1, 1);
+          Vector3D windDirV = Vector3D(7, 1, 1);
           Vector3D inside = dot(normal, windDirV - v) * normal;
           Vector3D windForce = consC * inside;
           pointMass.forces += windForce;
