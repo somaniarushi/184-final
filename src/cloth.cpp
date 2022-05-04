@@ -44,6 +44,7 @@ void Cloth::buildGrid() {
   double incr_amt = (2 * PI) / num_width_points;
 
   for (int h = 0; h < num_height_points; h++) {
+      r -= 0.002;
       for (double angle = 0; angle <= 2 * PI; angle += incr_amt) {
           Vector3D pos;
           double y = r * sin(angle);
