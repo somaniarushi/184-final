@@ -44,7 +44,7 @@ void Cloth::buildGrid() {
   double incr_amt = (2 * PI) / num_width_points;
 
   for (int h = 0; h < num_height_points; h++) {
-      r -= 0.002;
+      r -= 0.0025;
       for (double angle = 0; angle <= 2 * PI; angle += incr_amt) {
           Vector3D pos;
           double y = r * sin(angle);
@@ -64,30 +64,6 @@ void Cloth::buildGrid() {
       }
   }
 
-
-
-//  for (int h = 0; h < num_height_points; h++) {
-//      for (int w = 0; w < num_width_points; w++) {
-//          Vector3D pos;
-//          // y does not change.
-//          // x and z do change. -1 <= z <= 1
-//          double x;
-//          double y = h_offset * h;
-//          double z;
-//          x = r * sin(w * w_offset);
-//          z = r * cos(w * w_offset);
-//
-//         pos = Vector3D(x, y, z);
-////          if (w == 0 || w == num_width_points / 4 || w == num_width_points / 2
-////                        || w == 3 * num_width_points / 4 || w == num_width_points - 1) {
-////              point_masses.emplace_back(PointMass(pos, true));
-////          } else {
-////              point_masses.emplace_back(PointMass(pos, false));
-////          }
-//          point_masses.emplace_back(PointMass(pos, false));
-//      }
-//
-//  }
 
   for (int i = 0; i < pinned.size(); i++) {
       vector<int> xy = pinned[i];
@@ -178,7 +154,7 @@ void Cloth::simulate(double frames_per_sec, double simulation_steps, ClothParame
       Vector3D v = (1 - cp->damping / 100) * (pointMass.position - pointMass.last_position);
       Vector3D normal = pointMass.normal();
       //represents strength of wind
-      float consC = 1;
+      float consC = 0.5;
       //can change this, maybe put in cloth params
       Vector3D windDirV = wind;
       Vector3D inside = dot(normal, windDirV - v) * normal;
