@@ -55,7 +55,7 @@ void Cloth::buildGrid() {
           }
 
           pos = Vector3D(h_offset * h, y, z);
-          if (h == 0) {
+          if (h < 10) {
               point_masses.emplace_back(PointMass(pos, true));
           } else {
               point_masses.emplace_back(PointMass(pos, false));
