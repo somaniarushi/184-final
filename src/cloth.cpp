@@ -173,25 +173,6 @@ void Cloth::buildGrid() {
 
           }
 
-
-          // bending up ??
-//          if (w_count  == num_width_points - 1) {
-//              // structural no
-//            springs.emplace_back(Spring(m1, m1+num_width_points-1, STRUCTURAL));
-//            if (h_count > 0) {
-//              springs.emplace_back(Spring(m1, m1 + num_width_points - 1 - num_width_points, SHEARING));
-//            }
-//            if (h_count < num_height_points - 1) {
-//              springs.emplace_back(Spring(m1, m1 + num_width_points - 1 + num_width_points, SHEARING));
-//            }
-//
-//            springs.emplace_back(Spring(m1, m1+num_width_points-2, BENDING));
-//          }
-//
-//          if (w_count == 1) {
-//            springs.emplace_back(Spring(m1, m1+num_width_points-2, BENDING));
-//          }
-
       }
   }
 }
@@ -370,7 +351,7 @@ void Cloth::buildClothMesh() {
 
   // Create vector of triangles
   for (int y = 0; y < num_height_points - 1; y++) {
-    for (int x = 0; x < num_width_points - 1; x++) {
+    for (int x = 0; x < num_width_points; x++) {
       PointMass *pm = &point_masses[y * num_width_points + x];
       // Get neighboring point masses:
       /*                      *
@@ -387,19 +368,24 @@ void Cloth::buildClothMesh() {
        *                      *
        */
 
-      float u_min = x;
+      float u_min = y;
       u_min /= num_width_points - 1;
-      float u_max = x + 1;
+      float u_max = y + 1;
       u_max /= num_width_points - 1;
-      float v_min = y;
+      float v_min = x;
       v_min /= num_height_points - 1;
-      float v_max = y + 1;
+      float v_max = x - 1;
       v_max /= num_height_points - 1;
 
       PointMass *pm_A = pm                       ;
-      PointMass *pm_B = pm                    + 1;
-      PointMass *pm_C = pm + num_width_points    ;
-      PointMass *pm_D = pm + num_width_points + 1;
+      PointMass *pm_B = pm + num_width_points;
+      PointMass *pm_C = pm - 1;
+      PointMass *pm_D = pm + num_width_points - 1;
+
+      if (x == 0) {
+          pm_C = &point_masses[(y * num_height_points) + num_width_points - 1];
+          pm_D = &point_masses[((y + 1) * num_height_points) + num_width_points - 1];
+      }
 
       Vector3D uv_A = Vector3D(u_min, v_min, 0);
       Vector3D uv_B = Vector3D(u_max, v_min, 0);
@@ -459,7 +445,7 @@ void Cloth::buildClothMesh() {
 
   // Convenient variables for math
   int num_height_tris = (num_height_points - 1) * 2;
-  int num_width_tris = (num_width_points - 1) * 2;
+  int num_width_tris = (num_width_points) * 2;
 
   bool topLeft = true;
   for (int i = 0; i < triangles.size(); i++) {
@@ -510,6 +496,15 @@ void Cloth::buildClothMesh() {
     topLeft = !topLeft;
   }
 
-  clothMesh->triangles = triangles;
+  vector<Triangle*> new_tris;
+  for (int i = 0; i < triangles.size() / 2; i++) {
+      new_tris.emplace_back(triangles[i]);
+  }
+
+  for (int j = triangles.size() / 2; j < triangles.size() - 1; j+=4) {
+      new_tris.emplace_back(triangles[j]);
+      new_tris.emplace_back(triangles[j + 1]);
+  }
+  clothMesh->triangles = new_tris;
   this->clothMesh = clothMesh;
 }
