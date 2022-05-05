@@ -21,6 +21,7 @@ public:
   void init();
 
   void loadCloth(Cloth *cloth);
+  void updateCloth();
   void loadClothParameters(ClothParameters *cp);
   void loadCollisionObjects(vector<CollisionObject *> *objects);
   virtual bool isAlive();
@@ -40,7 +41,8 @@ private:
   void drawWireframe(GLShader &shader);
   void drawNormals(GLShader &shader);
   void drawPhong(GLShader &shader);
-  
+
+  void update_textures();
   void load_shaders();
   void load_textures();
   
@@ -63,6 +65,7 @@ private:
   int simulation_steps = 30;
 
   CGL::Vector3D gravity = CGL::Vector3D(0, -9.8, 0);
+  CGL::Vector3D wind = CGL::Vector3D(0, 0, 0);
   nanogui::Color color = nanogui::Color(1.0f, 1.0f, 1.0f, 1.0f);
 
   Cloth *cloth;

@@ -49,13 +49,13 @@ void Cloth::buildGrid() {
           double y = r * sin(angle);
           double z = r * cos(angle);
 
-          if (angle >= 2 * PI - incr_amt+1) {
+          if (angle >= 2 * PI - incr_amt + 1) {
               y = r * sin(0) + 0.0001;
               z = r * cos(0) + 0.0001;
           }
 
           pos = Vector3D(h_offset * h, y, z);
-          if (h < 10) {
+          if (h == 0) {
               point_masses.emplace_back(PointMass(pos, true));
           } else {
               point_masses.emplace_back(PointMass(pos, false));
@@ -106,7 +106,6 @@ void Cloth::buildGrid() {
             PointMass *m2 = &point_masses[index-1];
             springs.emplace_back(Spring(m1, m2, STRUCTURAL));
           }
-
             //above
           if (h_count > 0) {
             PointMass *m2 = &point_masses[index-num_width_points];
@@ -137,24 +136,22 @@ void Cloth::buildGrid() {
               PointMass *m2 = &point_masses[index-(num_width_points*2)];
               springs.emplace_back(Spring(m1, m2, BENDING));
           }
-
           // TUBE EXCEPTIONS
-          if (w_count  == 0) {
-            springs.emplace_back(Spring(m1, m1+num_width_points-1, STRUCTURAL));
-            if (h_count > 0) {
-              springs.emplace_back(Spring(m1, m1 + num_width_points - 1 - num_width_points, SHEARING));
-            }
-            if (h_count < num_height_points - 1) {
-              springs.emplace_back(Spring(m1, m1 + num_width_points - 1 + num_width_points, SHEARING));
-            }
+//          if (w_count  == 0) {
+//              springs.emplace_back(Spring(m1, m1+num_width_points-1, STRUCTURAL));
+//              if (h_count > 0) {
+//                  springs.emplace_back(Spring(m1, m1 + num_width_points - 1 - num_width_points, SHEARING));
+//              }
+//              if (h_count < num_height_points - 1) {
+//                  springs.emplace_back(Spring(m1, m1 + num_width_points - 1 + num_width_points, SHEARING));
+//              }
+//
+//              springs.emplace_back(Spring(m1, m1+num_width_points-2, BENDING));
+//          }
 
-            springs.emplace_back(Spring(m1, m1+num_width_points-2, BENDING));
-          }
-
-          if (w_count == 1) {
-            springs.emplace_back(Spring(m1, m1+num_width_points-2, BENDING));
-          }
-
+//          if (w_count == 1) {
+//              springs.emplace_back(Spring(m1, m1+num_width_points-2, BENDING));
+//          }
       }
   }
 }
@@ -167,12 +164,29 @@ void Cloth::simulate(double frames_per_sec, double simulation_steps, ClothParame
 
   // TODO (Part 2): Compute total force acting on each point mass.
   Vector3D externalForce;
-  for (Vector3D &accel : external_accelerations) {
-    externalForce += (mass * accel);
-  }
+//  for (Vector3D &accel : external_accelerations) {
+//    externalForce += (mass * accel);
+//  }
+
+  Vector3D gravity = external_accelerations[0];
+  Vector3D wind = external_accelerations[1];
+
   for (PointMass &pointMass : point_masses) {
+      Vector3D v = (1 - cp->damping / 100) * (pointMass.position - pointMass.last_position);
+      Vector3D normal = pointMass.normal();
+      //represents strength of wind
+      float consC = 1;
+      //can change this, maybe put in cloth params
+      Vector3D windDirV = wind;
+      Vector3D inside = dot(normal, windDirV - v) * normal;
+      Vector3D windForce = consC * inside;
+
+      Vector3D externalForce = mass * windForce + mass * gravity;
+
     pointMass.forces = externalForce;
   }
+
+
   //Next, apply the spring correction forces. For each spring, skip over the spring if that spring's constraint type is currently disabled. You can check this using cp, which has boolean values such as enable_structural_constraints. Otherwise, compute the force applied to the two masses on its ends using Hooke's law:
 
 
@@ -196,14 +210,14 @@ void Cloth::simulate(double frames_per_sec, double simulation_steps, ClothParame
   for (PointMass& pointMass : point_masses) {
       if (!pointMass.pinned) {
           Vector3D v = (1 - cp->damping / 100) * (pointMass.position - pointMass.last_position);
-          Vector3D normal = pointMass.normal();
-          //represents strength of wind
-          float consC = 0.5;
-          //can change this, maybe put in cloth params
-          Vector3D windDirV = Vector3D(10, 1, 1);
-          Vector3D inside = dot(normal, windDirV - v) * normal;
-          Vector3D windForce = consC * inside;
-          pointMass.forces += windForce;
+//          Vector3D normal = pointMass.normal();
+//          //represents strength of wind
+//          float consC = 0.5;
+//          //can change this, maybe put in cloth params
+//          Vector3D windDirV = Vector3D(1, 1, 1);
+//          Vector3D inside = dot(normal, windDirV - v) * normal;
+//          Vector3D windForce = consC * inside;
+//          pointMass.forces += windForce;
           pointMass.last_position = pointMass.position;
           pointMass.position = pointMass.position + v + pointMass.forces * delta_t * delta_t / mass;
       }
