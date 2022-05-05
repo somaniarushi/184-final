@@ -52,7 +52,7 @@ void load_cubemap(int frame_idx, GLuint handle, const std::vector<std::string>& 
     unsigned char* img_data = stbi_load(file_locs[side_idx].c_str(), &img_x, &img_y, &img_n, 3);
     glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + side_idx, 0, GL_RGB, img_x, img_y, 0, GL_RGB, GL_UNSIGNED_BYTE, img_data);
     stbi_image_free(img_data);
-    std::cout << "Side " << side_idx << " has dimensions " << img_x << ", " << img_y << std::endl;
+//    std::cout << "Side " << side_idx << " has dimensions " << img_x << ", " << img_y << std::endl;
 
     glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
@@ -60,6 +60,19 @@ void load_cubemap(int frame_idx, GLuint handle, const std::vector<std::string>& 
     glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
   }
+}
+
+void ClothSimulator::update_textures(){
+    std::vector<std::string> updated_fnames = {
+            m_project_root + "/textures/misc/posx.jpg",
+            m_project_root + "/textures/misc/negx.jpg",
+            m_project_root + "/textures/misc/posy.png",
+            m_project_root + "/textures/misc/negy.jpg",
+            m_project_root + "/textures/misc/posz.jpg",
+            m_project_root + "/textures/misc/negz.jpg"
+    };
+    load_cubemap(5, m_gl_cubemap_tex, updated_fnames);
+//    std::cout << "Updated cubemap texture" << std::endl;
 }
 
 void ClothSimulator::load_textures() {
@@ -78,7 +91,7 @@ void ClothSimulator::load_textures() {
   std::cout << "Texture 2 loaded with size: " << m_gl_texture_2_size << std::endl;
   std::cout << "Texture 3 loaded with size: " << m_gl_texture_3_size << std::endl;
   std::cout << "Texture 4 loaded with size: " << m_gl_texture_4_size << std::endl;
-  
+
   std::vector<std::string> cubemap_fnames = {
     m_project_root + "/textures/cube/posx.jpg",
     m_project_root + "/textures/cube/negx.jpg",
@@ -180,6 +193,8 @@ ClothSimulator::~ClothSimulator() {
 }
 
 void ClothSimulator::loadCloth(Cloth *cloth) { this->cloth = cloth; }
+
+void ClothSimulator::updateCloth(){ update_textures(); }
 
 void ClothSimulator::loadClothParameters(ClothParameters *cp) { this->cp = cp; }
 
@@ -295,7 +310,7 @@ void ClothSimulator::drawContents() {
   glEnable(GL_DEPTH_TEST);
 
   if (!is_paused) {
-    vector<Vector3D> external_accelerations = {gravity};
+    vector<Vector3D> external_accelerations = {gravity, wind};
 
     for (int i = 0; i < simulation_steps; i++) {
       cloth->simulate(frames_per_sec, simulation_steps, cp, external_accelerations, collision_objects);
@@ -758,6 +773,50 @@ void ClothSimulator::initGUI(Screen *screen) {
     fb->setMinValue(0);
     fb->setCallback([this](float value) { cp->ks = value; });
   }
+
+    new Label(window, "Wind", "sans-bold");
+
+    {
+        Widget *panel = new Widget(window);
+        GridLayout *layout =
+                new GridLayout(Orientation::Horizontal, 2, Alignment::Middle, 5, 5);
+        layout->setColAlignment({Alignment::Maximum, Alignment::Fill});
+        layout->setSpacing(0, 10);
+        panel->setLayout(layout);
+
+        new Label(panel, "x :", "sans-bold");
+
+        FloatBox<double> *fb = new FloatBox<double>(panel);
+        fb->setEditable(true);
+        fb->setFixedSize(Vector2i(100, 20));
+        fb->setFontSize(14);
+        fb->setValue(wind.x);
+        fb->setUnits("m/s^2");
+        fb->setSpinnable(true);
+        fb->setCallback([this](float value) { wind.x = value; });
+
+        new Label(panel, "y :", "sans-bold");
+
+        fb = new FloatBox<double>(panel);
+        fb->setEditable(true);
+        fb->setFixedSize(Vector2i(100, 20));
+        fb->setFontSize(14);
+        fb->setValue(wind.y);
+        fb->setUnits("m/s^2");
+        fb->setSpinnable(true);
+        fb->setCallback([this](float value) { wind.y = value; });
+
+        new Label(panel, "z :", "sans-bold");
+
+        fb = new FloatBox<double>(panel);
+        fb->setEditable(true);
+        fb->setFixedSize(Vector2i(100, 20));
+        fb->setFontSize(14);
+        fb->setValue(wind.z);
+        fb->setUnits("m/s^2");
+        fb->setSpinnable(true);
+        fb->setCallback([this](float value) { wind.z = value; });
+    }
 
   // Simulation constants
 
