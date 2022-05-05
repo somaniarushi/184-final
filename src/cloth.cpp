@@ -44,7 +44,10 @@ void Cloth::buildGrid() {
   double incr_amt = (2 * PI) / num_width_points;
 
   for (int h = 0; h < num_height_points; h++) {
-      r -= 0.0025;
+      if (h<num_height_points/2) {
+          r -= 0.0025;
+      }
+
       for (double angle = 0; angle <= 2 * PI; angle += incr_amt) {
           Vector3D pos;
           double y = r * sin(angle);
@@ -77,43 +80,149 @@ void Cloth::buildGrid() {
           int index = w_count+(h_count*num_width_points);
           PointMass* m1 = &point_masses[index];
 
-          // structural constraint check
-          //left
-          if (w_count > 0) {
-            PointMass *m2 = &point_masses[index-1];
-            springs.emplace_back(Spring(m1, m2, STRUCTURAL));
-          }
-
-            //above
-          if (h_count > 0) {
-            PointMass *m2 = &point_masses[index-num_width_points];
-            springs.emplace_back(Spring(m1, m2, STRUCTURAL));
-          }
-
-          //shearing constraint check
-          if (h_count > 0 ) {
-              //left upper
-              if(w_count > 0 ) {
-                  PointMass *m2 = &point_masses[index-num_width_points-1];
-                  springs.emplace_back(Spring(m1, m2, SHEARING));
+          if (h_count < num_height_points/2) {
+              // structural above
+              if (w_count < num_height_points - 1) {
+                  springs.emplace_back(Spring(m1, m1 + 1, STRUCTURAL));
               }
-              //right upper
-              if(w_count < num_width_points-1) {
-                  PointMass *m2 = &point_masses[index-num_width_points+1];
-                  springs.emplace_back(Spring(m1, m2, SHEARING));
+              // structural left
+              if (h_count > 0) {
+                  springs.emplace_back(Spring(m1, m1 - num_width_points, STRUCTURAL));
+              }
+
+              // shearing diag up left
+              if (w_count < num_height_points - 1 && h_count > 0) {
+                  springs.emplace_back(Spring(m1, m1 + 1 - num_width_points, SHEARING));
+              }
+
+              // shearing diag up right
+              if (w_count < num_height_points - 1 && h_count < num_width_points - 1) {
+                  springs.emplace_back(Spring(m1, m1 + 1 + num_width_points, SHEARING));
+              }
+
+              // bending two to left
+              if (h_count > 1) {
+                  springs.emplace_back(Spring(m1, m1 - 2* num_width_points, BENDING));
+              }
+
+              // bending TWO up {
+              if (w_count < num_width_points - 2) {
+                  springs.emplace_back(Spring(m1, m1 + 2, BENDING));
+              }
+          } else {
+
+              // FIXME
+              // structural above
+              if (w_count < num_height_points - 1 && w_count % 2 == 0) {
+                  springs.emplace_back(Spring(m1, m1 + 1, STRUCTURAL));
+              }
+              // structural left
+              if (h_count > num_height_points / 2 && w_count % 2 == 0) {
+                  springs.emplace_back(Spring(m1, m1 - num_width_points, STRUCTURAL));
+              }
+
+              // shearing diag up left
+              if (w_count < num_height_points - 1 && h_count > 0 && w_count % 2 == 0) {
+                  springs.emplace_back(Spring(m1, m1 + 1 - num_width_points, SHEARING));
+              }
+
+              // shearing diag up right
+              if (w_count < num_height_points - 1 && h_count < num_width_points - 1 && w_count % 2 == 0) {
+                  springs.emplace_back(Spring(m1, m1 + 1 + num_width_points, SHEARING));
+              }
+
+              // bending two to left
+              if (h_count > 1) {
+                  springs.emplace_back(Spring(m1, m1 - 2* num_width_points, BENDING));
+              }
+
+              // bending ONE up {
+              if (w_count < num_width_points - 1 && w_count % 2 == 0) {
+                  springs.emplace_back(Spring(m1, m1 + 1, BENDING));
               }
           }
 
-          //bending constraint check
-          if (w_count > 1) {
-              PointMass *m2 = &point_masses[index-2];
-              springs.emplace_back(Spring(m1, m2, BENDING));
-          }
-          //above
-          if (h_count > 1) {
-              PointMass *m2 = &point_masses[index-(num_width_points*2)];
-              springs.emplace_back(Spring(m1, m2, BENDING));
-          }
+
+//          if (h_count > num_height_points / 2) {
+//              // structural constraint check
+//              //left
+//              if (w_count > 0 && h_count % 2 == 0) {
+//                  PointMass *m2 = &point_masses[index-num_width_points];
+//                  springs.emplace_back(Spring(m1, m2, STRUCTURAL));
+//              }
+//
+//              //above
+//              if (h_count > 0 && h_count % 2 == 0) {
+//                  PointMass *m2 = &point_masses[index-1];
+//                  springs.emplace_back(Spring(m1, m2, STRUCTURAL));
+//
+//              }
+//
+//              //shearing constraint check
+//              if (h_count > 0 && w_count % 2 == 0) {
+//                  //left upper
+//                  if(w_count > 0 && w_count % 2 == 0 ) {
+//                      PointMass *m2 = &point_masses[index-num_width_points-1];
+//                      springs.emplace_back(Spring(m1, m2, SHEARING));
+//                  }
+//                  //right upper
+//                  if(w_count < num_width_points-1  && w_count % 2 == 0) {
+//                      PointMass *m2 = &point_masses[index-num_width_points+1];
+//                      springs.emplace_back(Spring(m1, m2, SHEARING));
+//                  }
+//              }
+//
+//              //bending constraint check
+//              if (w_count > 1  && w_count % 2 == 0) {
+//                  PointMass *m2 = &point_masses[index-2];
+//                  springs.emplace_back(Spring(m1, m2, BENDING));
+//              }
+//              //above
+//              if (h_count > 1 && w_count % 2 == 0) {
+//                  PointMass *m2 = &point_masses[index-(num_width_points*1)];
+//                  springs.emplace_back(Spring(m1, m2, BENDING));
+//              }
+//          } else {
+//              // structural constraint check
+//              //left
+//              if (w_count > 0 && w_count % 2 == 0) {
+//                  PointMass *m2 = &point_masses[index-1];
+//                  springs.emplace_back(Spring(m1, m2, STRUCTURAL));
+//              }
+//
+//              //above
+//              if (h_count > 0) {
+//                  PointMass *m2 = &point_masses[index-num_width_points];
+//                  springs.emplace_back(Spring(m1, m2, STRUCTURAL));
+//              }
+//
+//              //shearing constraint check
+//              if (h_count > 0 ) {
+//                  //left upper
+//                  if(w_count > 0 && w_count % 2 == 0 ) {
+//                      PointMass *m2 = &point_masses[index-num_width_points-1];
+//                      springs.emplace_back(Spring(m1, m2, SHEARING));
+//                  }
+//                  //right upper
+//                  if(w_count < num_width_points-1  && w_count % 2 == 0) {
+//                      PointMass *m2 = &point_masses[index-num_width_points+1];
+//                      springs.emplace_back(Spring(m1, m2, SHEARING));
+//                  }
+//              }
+//
+//              //bending constraint check
+//              if (w_count > 1  && w_count % 2 == 0) {
+//                  PointMass *m2 = &point_masses[index-2];
+//                  springs.emplace_back(Spring(m1, m2, BENDING));
+//              }
+//              //above
+//              if (h_count > 1) {
+//                  PointMass *m2 = &point_masses[index-(num_width_points*2)];
+//                  springs.emplace_back(Spring(m1, m2, BENDING));
+//              }
+//          }
+
+
 
           // TUBE EXCEPTIONS
 //          if (w_count  == 0) {
