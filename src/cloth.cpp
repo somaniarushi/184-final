@@ -44,7 +44,7 @@ void Cloth::buildGrid() {
   double incr_amt = (2 * PI) / num_width_points;
 
   for (int h = 0; h < num_height_points; h++) {
-      if (h<num_height_points/2) {
+      if (h<2*num_height_points/3) {
           r -= 0.0025;
       }
 
@@ -53,10 +53,10 @@ void Cloth::buildGrid() {
           double y = r * sin(angle);
           double z = r * cos(angle);
 
-          if (angle >= 2 * PI - incr_amt+1) {
-              y = r * sin(0) + 0.0001;
-              z = r * cos(0) + 0.0001;
-          }
+//          if (angle >= 2 * PI - incr_amt+1) {
+//              y = r * sin(0) + 0.0001;
+//              z = r * cos(0) + 0.0001;
+//          }
 
           pos = Vector3D(h_offset * h, y, z);
           if (h < 10) {
@@ -80,7 +80,7 @@ void Cloth::buildGrid() {
           int index = w_count+(h_count*num_width_points);
           PointMass* m1 = &point_masses[index];
 
-          if (h_count < num_height_points/2) {
+          if (h_count < 2*num_height_points/3) {
               // structural above
               if (w_count < num_height_points - 1) {
                   springs.emplace_back(Spring(m1, m1 + 1, STRUCTURAL));
@@ -157,7 +157,7 @@ void Cloth::buildGrid() {
                   springs.emplace_back(Spring(m1, &point_masses[(h_count + 1) * num_height_points], SHEARING));
               }
 
-              if (h_count < num_height_points/2) {
+              if (h_count < 2*num_height_points/3) {
                   springs.emplace_back(Spring(m1, &point_masses[h_count * num_height_points + 1], BENDING));
               } else if (w_count % 2 != 0) {
                   springs.emplace_back(Spring(m1, &point_masses[h_count * num_height_points], BENDING));
@@ -165,7 +165,7 @@ void Cloth::buildGrid() {
 
           } else if (w_count == num_width_points - 2) {
               // bending up two
-              if (h_count < num_height_points/2) {
+              if (h_count < 2*num_height_points/3) {
                   springs.emplace_back(Spring(m1, &point_masses[h_count * num_height_points], BENDING));
               } else if (w_count % 2 != 0) {
                   springs.emplace_back(Spring(m1, m1 + 1, BENDING));
@@ -497,11 +497,11 @@ void Cloth::buildClothMesh() {
   }
 
   vector<Triangle*> new_tris;
-  for (int i = 0; i < triangles.size() / 2; i++) {
+  for (int i = 0; i < 2*triangles.size() / 3; i++) {
       new_tris.emplace_back(triangles[i]);
   }
 
-  for (int j = triangles.size() / 2; j < triangles.size() - 1; j+=4) {
+  for (int j = 2*triangles.size() / 3 + 2; j < triangles.size() - 1; j+=4) {
       new_tris.emplace_back(triangles[j]);
       new_tris.emplace_back(triangles[j + 1]);
   }
