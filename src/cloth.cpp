@@ -44,16 +44,19 @@ void Cloth::buildGrid() {
   double incr_amt = (2 * PI) / num_width_points;
 
   for (int h = 0; h < num_height_points; h++) {
-      r -= 0.002;
+      if (h<2*num_height_points/3) {
+          r -= 0.0025;
+      }
+
       for (double angle = 0; angle <= 2 * PI; angle += incr_amt) {
           Vector3D pos;
           double y = r * sin(angle);
           double z = r * cos(angle);
 
-          if (angle >= 2 * PI - incr_amt+1) {
-              y = r * sin(0) + 0.0001;
-              z = r * cos(0) + 0.0001;
-          }
+//          if (angle >= 2 * PI - incr_amt+1) {
+//              y = r * sin(0) + 0.0001;
+//              z = r * cos(0) + 0.0001;
+//          }
 
           pos = Vector3D(h_offset * h, y, z);
           if (h < 10) {
@@ -64,30 +67,6 @@ void Cloth::buildGrid() {
       }
   }
 
-
-
-//  for (int h = 0; h < num_height_points; h++) {
-//      for (int w = 0; w < num_width_points; w++) {
-//          Vector3D pos;
-//          // y does not change.
-//          // x and z do change. -1 <= z <= 1
-//          double x;
-//          double y = h_offset * h;
-//          double z;
-//          x = r * sin(w * w_offset);
-//          z = r * cos(w * w_offset);
-//
-//         pos = Vector3D(x, y, z);
-////          if (w == 0 || w == num_width_points / 4 || w == num_width_points / 2
-////                        || w == 3 * num_width_points / 4 || w == num_width_points - 1) {
-////              point_masses.emplace_back(PointMass(pos, true));
-////          } else {
-////              point_masses.emplace_back(PointMass(pos, false));
-////          }
-//          point_masses.emplace_back(PointMass(pos, false));
-//      }
-//
-//  }
 
   for (int i = 0; i < pinned.size(); i++) {
       vector<int> xy = pinned[i];
@@ -101,59 +80,97 @@ void Cloth::buildGrid() {
           int index = w_count+(h_count*num_width_points);
           PointMass* m1 = &point_masses[index];
 
-          // structural constraint check
-          //left
-          if (w_count > 0) {
-            PointMass *m2 = &point_masses[index-1];
-            springs.emplace_back(Spring(m1, m2, STRUCTURAL));
-          }
-
-            //above
-          if (h_count > 0) {
-            PointMass *m2 = &point_masses[index-num_width_points];
-            springs.emplace_back(Spring(m1, m2, STRUCTURAL));
-          }
-
-          //shearing constraint check
-          if (h_count > 0 ) {
-              //left upper
-              if(w_count > 0 ) {
-                  PointMass *m2 = &point_masses[index-num_width_points-1];
-                  springs.emplace_back(Spring(m1, m2, SHEARING));
+          if (h_count < 2*num_height_points/3) {
+              // structural above
+              if (w_count < num_height_points - 1) {
+                  springs.emplace_back(Spring(m1, m1 + 1, STRUCTURAL));
               }
-              //right upper
-              if(w_count < num_width_points-1) {
-                  PointMass *m2 = &point_masses[index-num_width_points+1];
-                  springs.emplace_back(Spring(m1, m2, SHEARING));
+              // structural left
+              if (h_count > 0) {
+                  springs.emplace_back(Spring(m1, m1 - num_width_points, STRUCTURAL));
               }
-          }
 
-          //bending constraint check
-          if (w_count > 1) {
-              PointMass *m2 = &point_masses[index-2];
-              springs.emplace_back(Spring(m1, m2, BENDING));
-          }
-          //above
-          if (h_count > 1) {
-              PointMass *m2 = &point_masses[index-(num_width_points*2)];
-              springs.emplace_back(Spring(m1, m2, BENDING));
+              // shearing diag up left
+              if (w_count < num_height_points - 1 && h_count > 0) {
+                  springs.emplace_back(Spring(m1, m1 + 1 - num_width_points, SHEARING));
+              }
+
+              // shearing diag up right
+              if (w_count < num_height_points - 1 && h_count < num_width_points - 1) {
+                  springs.emplace_back(Spring(m1, m1 + 1 + num_width_points, SHEARING));
+              }
+
+              // bending two to left
+              if (h_count > 1) {
+                  springs.emplace_back(Spring(m1, m1 - 2* num_width_points, BENDING));
+              }
+
+              // bending TWO up {
+              if (w_count < num_width_points - 2) {
+                  springs.emplace_back(Spring(m1, m1 + 2, BENDING));
+              }
+          } else {
+
+              // FIXME
+              // structural above
+              if (w_count < num_height_points - 1 && w_count % 2 != 0) {
+                  springs.emplace_back(Spring(m1, m1 + 1, STRUCTURAL));
+              }
+              // structural left
+              if (h_count > 0 && w_count % 2 != 0) {
+                  springs.emplace_back(Spring(m1, m1 - num_width_points, STRUCTURAL));
+              }
+
+              // shearing diag up left
+              if (w_count < num_height_points - 1 && h_count > 0 && w_count % 2 != 0) {
+                  springs.emplace_back(Spring(m1, m1 + 1 - num_width_points, SHEARING));
+              }
+
+              // shearing diag up right
+              if (w_count < num_height_points - 1 && h_count < num_width_points - 1 && w_count % 2 != 0) {
+                  springs.emplace_back(Spring(m1, m1 + 1 + num_width_points, SHEARING));
+              }
+
+              // bending two to left
+              if (h_count > 1) {
+                  springs.emplace_back(Spring(m1, m1 - 2* num_width_points, BENDING));
+              }
+
+              // bending ONE up {
+              if (w_count < num_width_points - 1 && w_count % 2 != 0) {
+                  springs.emplace_back(Spring(m1, m1 + 1, BENDING));
+              }
           }
 
           // TUBE EXCEPTIONS
-          if (w_count  == 0) {
-            springs.emplace_back(Spring(m1, m1+num_width_points-1, STRUCTURAL));
-            if (h_count > 0) {
-              springs.emplace_back(Spring(m1, m1 + num_width_points - 1 - num_width_points, SHEARING));
-            }
-            if (h_count < num_height_points - 1) {
-              springs.emplace_back(Spring(m1, m1 + num_width_points - 1 + num_width_points, SHEARING));
-            }
+          // structural above
+          if (w_count == num_width_points - 1) {
+              springs.emplace_back(Spring(m1, &point_masses[h_count * num_height_points], STRUCTURAL));
 
-            springs.emplace_back(Spring(m1, m1+num_width_points-2, BENDING));
-          }
+              // shearing diagonal up left
+              if (h_count > 0) {
+                  springs.emplace_back(Spring(m1, &point_masses[(h_count - 1) * num_height_points], SHEARING));
+              }
 
-          if (w_count == 1) {
-            springs.emplace_back(Spring(m1, m1+num_width_points-2, BENDING));
+//              // shearing diagonal up right
+              if (h_count < num_height_points - 1) {
+                  springs.emplace_back(Spring(m1, &point_masses[(h_count + 1) * num_height_points], SHEARING));
+              }
+
+              if (h_count < 2*num_height_points/3) {
+                  springs.emplace_back(Spring(m1, &point_masses[h_count * num_height_points + 1], BENDING));
+              } else if (w_count % 2 != 0) {
+                  springs.emplace_back(Spring(m1, &point_masses[h_count * num_height_points], BENDING));
+              }
+
+          } else if (w_count == num_width_points - 2) {
+              // bending up two
+              if (h_count < 2*num_height_points/3) {
+                  springs.emplace_back(Spring(m1, &point_masses[h_count * num_height_points], BENDING));
+              } else if (w_count % 2 != 0) {
+                  springs.emplace_back(Spring(m1, m1 + 1, BENDING));
+              }
+
           }
 
       }
@@ -167,11 +184,26 @@ void Cloth::simulate(double frames_per_sec, double simulation_steps, ClothParame
   double delta_t = 1.0f / frames_per_sec / simulation_steps;
 
   // TODO (Part 2): Compute total force acting on each point mass.
+  Vector3D externalForce;
   Vector3D gravity = external_accelerations[0];
   Vector3D wind = external_accelerations[1];
+//  for (Vector3D &accel : external_accelerations) {
+//    externalForce += (mass * accel);
+//  }
 
-    for (PointMass &pointMass : point_masses) {
-    pointMass.forces = mass * gravity;
+  for (PointMass &pointMass : point_masses) {
+      Vector3D v = (1 - cp->damping / 100) * (pointMass.position - pointMass.last_position);
+      Vector3D normal = pointMass.normal();
+      //represents strength of wind
+      float consC = 0.5;
+      //can change this, maybe put in cloth params
+      Vector3D windDirV = wind;
+      Vector3D inside = dot(normal, windDirV - v) * normal;
+      Vector3D windForce = consC * inside;
+
+      Vector3D externalForce = mass * windForce + mass * gravity;
+
+    pointMass.forces = externalForce;
   }
 
   //Next, apply the spring correction forces. For each spring, skip over the spring if that spring's constraint type is currently disabled. You can check this using cp, which has boolean values such as enable_structural_constraints. Otherwise, compute the force applied to the two masses on its ends using Hooke's law:
@@ -197,14 +229,6 @@ void Cloth::simulate(double frames_per_sec, double simulation_steps, ClothParame
   for (PointMass& pointMass : point_masses) {
       if (!pointMass.pinned) {
           Vector3D v = (1 - cp->damping / 100) * (pointMass.position - pointMass.last_position);
-          Vector3D normal = pointMass.normal();
-          //represents strength of wind
-          float consC = 0.5;
-          //can change this, maybe put in cloth params
-          Vector3D windDirV = wind;
-          Vector3D inside = dot(normal, windDirV - v) * normal;
-          Vector3D windForce = consC * inside;
-          pointMass.forces += windForce;
           pointMass.last_position = pointMass.position;
           pointMass.position = pointMass.position + v + pointMass.forces * delta_t * delta_t / mass;
       }
@@ -328,7 +352,7 @@ void Cloth::buildClothMesh() {
 
   // Create vector of triangles
   for (int y = 0; y < num_height_points - 1; y++) {
-    for (int x = 0; x < num_width_points - 1; x++) {
+    for (int x = 0; x < num_width_points; x++) {
       PointMass *pm = &point_masses[y * num_width_points + x];
       // Get neighboring point masses:
       /*                      *
@@ -345,19 +369,24 @@ void Cloth::buildClothMesh() {
        *                      *
        */
 
-      float u_min = x;
+      float u_min = y;
       u_min /= num_width_points - 1;
-      float u_max = x + 1;
+      float u_max = y + 1;
       u_max /= num_width_points - 1;
-      float v_min = y;
+      float v_min = x;
       v_min /= num_height_points - 1;
-      float v_max = y + 1;
+      float v_max = x - 1;
       v_max /= num_height_points - 1;
 
       PointMass *pm_A = pm                       ;
-      PointMass *pm_B = pm                    + 1;
-      PointMass *pm_C = pm + num_width_points    ;
-      PointMass *pm_D = pm + num_width_points + 1;
+      PointMass *pm_B = pm + num_width_points;
+      PointMass *pm_C = pm - 1;
+      PointMass *pm_D = pm + num_width_points - 1;
+
+      if (x == 0) {
+          pm_C = &point_masses[(y * num_height_points) + num_width_points - 1];
+          pm_D = &point_masses[((y + 1) * num_height_points) + num_width_points - 1];
+      }
 
       Vector3D uv_A = Vector3D(u_min, v_min, 0);
       Vector3D uv_B = Vector3D(u_max, v_min, 0);
@@ -417,7 +446,7 @@ void Cloth::buildClothMesh() {
 
   // Convenient variables for math
   int num_height_tris = (num_height_points - 1) * 2;
-  int num_width_tris = (num_width_points - 1) * 2;
+  int num_width_tris = (num_width_points) * 2;
 
   bool topLeft = true;
   for (int i = 0; i < triangles.size(); i++) {
@@ -468,6 +497,15 @@ void Cloth::buildClothMesh() {
     topLeft = !topLeft;
   }
 
-  clothMesh->triangles = triangles;
+  vector<Triangle*> new_tris;
+  for (int i = 0; i < 2*triangles.size() / 3; i++) {
+      new_tris.emplace_back(triangles[i]);
+  }
+
+  for (int j = 2*triangles.size() / 3 + 2; j < triangles.size() - 1; j+=4) {
+      new_tris.emplace_back(triangles[j]);
+      new_tris.emplace_back(triangles[j + 1]);
+  }
+  clothMesh->triangles = new_tris;
   this->clothMesh = clothMesh;
 }
