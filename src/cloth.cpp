@@ -35,37 +35,54 @@ void Cloth::buildGrid() {
 
   vector<vector<int>>::iterator start = pinned.begin();
   vector<int>::iterator start_pt;
-  double w_offset = width/num_width_points;
-  double h_offset = height/num_height_points;
+  double width_multiplier = width/num_width_points;
+  double height_multiplier = height/num_height_points;
 
   Vector3D origin = Vector3D();
   double r = width / 4;
 
   double incr_amt = (2 * PI) / num_width_points;
+    for (int w = 0; w < num_height_points; w += 1) {
+        for (int h = 0; h < num_width_points; h += 1) {
 
-  for (int h = 0; h < num_height_points; h++) {
-      if (h<2*num_height_points/3) {
-          r -= 0.0025;
-      }
+            float x, y, z;
 
-      for (double angle = 0; angle <= 2 * PI; angle += incr_amt) {
-          Vector3D pos;
-          double y = r * sin(angle);
-          double z = r * cos(angle);
+            x = w * width_multiplier;
+            y = (orientation == HORIZONTAL) ? 1.0f : h * height_multiplier;
+            z = (orientation == HORIZONTAL) ? h * height_multiplier : (double) rand() / double(RAND_MAX) * 2.0/1000 - 1.0/1000;
 
-//          if (angle >= 2 * PI - incr_amt+1) {
-//              y = r * sin(0) + 0.0001;
-//              z = r * cos(0) + 0.0001;
-//          }
+            bool is_pinned = false;
+            for (auto pinnedPoint: pinned) {
+                if (pinnedPoint[0] == w && pinnedPoint[1] == h) {
+                    is_pinned = true;
+                    break;
+                }
+            }
 
-          pos = Vector3D(h_offset * h, y, z);
-          if (h < 10) {
-              point_masses.emplace_back(PointMass(pos, true));
-          } else {
-              point_masses.emplace_back(PointMass(pos, false));
-          }
-      }
-  }
+            point_masses.push_back(PointMass(Vector3D(x, y, z), is_pinned));
+        }
+    }
+
+//  for (int h = 0; h < num_height_points; h++) {
+//
+//      for (double angle = 0; angle <= 2 * PI; angle += incr_amt) {
+//          Vector3D pos;
+//          double y = r * sin(angle);
+//          double z = r * cos(angle);
+//
+////          if (angle >= 2 * PI - incr_amt+1) {
+////              y = r * sin(0) + 0.0001;
+////              z = r * cos(0) + 0.0001;
+////          }
+//
+////          pos = Vector3D(h_offset * h, y, z);
+////          if (h < 10) {
+////              point_masses.emplace_back(PointMass(pos, true));
+////          } else {
+//              point_masses.emplace_back(PointMass(pos, false));
+//       //   }
+//      }
+//  }
 
 
   for (int i = 0; i < pinned.size(); i++) {
@@ -80,11 +97,31 @@ void Cloth::buildGrid() {
           int index = w_count+(h_count*num_width_points);
           PointMass* m1 = &point_masses[index];
 
-          if (h_count < 2*num_height_points/3) {
+          if (h_count % 2 == 0 && w_count % 2 != 0) {
+              // shearing diag up right
+              if (w_count < num_height_points - 1 && h_count < num_width_points - 1) {
+                  springs.emplace_back(Spring(m1, m1 + 1 + num_width_points, SHEARING));
+              }
+
+              if (w_count < num_height_points - 1) {
+                  springs.emplace_back(Spring(m1, m1 + 1, STRUCTURAL));
+              }
+
+          }
+
+          if (h_count % 2 != 0 && w_count % 2 == 0) {
+              // structural left
+              if (h_count > 0) {
+                  springs.emplace_back(Spring(m1, m1 - num_width_points, STRUCTURAL));
+              }
+          }
+
+          if (h_count % 2 != 0 && w_count % 2 != 0) {
               // structural above
               if (w_count < num_height_points - 1) {
                   springs.emplace_back(Spring(m1, m1 + 1, STRUCTURAL));
               }
+
               // structural left
               if (h_count > 0) {
                   springs.emplace_back(Spring(m1, m1 - num_width_points, STRUCTURAL));
@@ -94,84 +131,82 @@ void Cloth::buildGrid() {
               if (w_count < num_height_points - 1 && h_count > 0) {
                   springs.emplace_back(Spring(m1, m1 + 1 - num_width_points, SHEARING));
               }
-
-              // shearing diag up right
-              if (w_count < num_height_points - 1 && h_count < num_width_points - 1) {
-                  springs.emplace_back(Spring(m1, m1 + 1 + num_width_points, SHEARING));
-              }
+//
+//
 
               // bending two to left
-              if (h_count > 1) {
-                  springs.emplace_back(Spring(m1, m1 - 2* num_width_points, BENDING));
+              if (h_count > 0) {
+                  springs.emplace_back(Spring(m1, m1 - 1 * num_width_points, BENDING));
               }
-
-              // bending TWO up {
-              if (w_count < num_width_points - 2) {
-                  springs.emplace_back(Spring(m1, m1 + 2, BENDING));
-              }
-          } else {
-
-              // FIXME
-              // structural above
-              if (w_count < num_height_points - 1 && w_count % 2 != 0) {
-                  springs.emplace_back(Spring(m1, m1 + 1, STRUCTURAL));
-              }
-              // structural left
-              if (h_count > 0 && w_count % 2 != 0) {
-                  springs.emplace_back(Spring(m1, m1 - num_width_points, STRUCTURAL));
-              }
-
-              // shearing diag up left
-              if (w_count < num_height_points - 1 && h_count > 0 && w_count % 2 != 0) {
-                  springs.emplace_back(Spring(m1, m1 + 1 - num_width_points, SHEARING));
-              }
-
-              // shearing diag up right
-              if (w_count < num_height_points - 1 && h_count < num_width_points - 1 && w_count % 2 != 0) {
-                  springs.emplace_back(Spring(m1, m1 + 1 + num_width_points, SHEARING));
-              }
-
-              // bending two to left
-              if (h_count > 1) {
-                  springs.emplace_back(Spring(m1, m1 - 2* num_width_points, BENDING));
-              }
-
-              // bending ONE up {
-              if (w_count < num_width_points - 1 && w_count % 2 != 0) {
-                  springs.emplace_back(Spring(m1, m1 + 1, BENDING));
-              }
+//
+////              // bending TWO up {
+//              if (w_count < num_width_points - 1) {
+//                  springs.emplace_back(Spring(m1, m1 + 1, BENDING));
+//              }
           }
+       //   } else {
+
+//              // FIXME
+//              // structural above
+//              if (w_count < num_height_points - 1 && w_count % 2 != 0) {
+//                  springs.emplace_back(Spring(m1, m1 + 1, STRUCTURAL));
+//              }
+//              // structural left
+//              if (h_count > 0 && w_count % 2 != 0) {
+//                  springs.emplace_back(Spring(m1, m1 - num_width_points, STRUCTURAL));
+//              }
+//
+//              // shearing diag up left
+//              if (w_count < num_height_points - 1 && h_count > 0 && w_count % 2 != 0) {
+//                  springs.emplace_back(Spring(m1, m1 + 1 - num_width_points, SHEARING));
+//              }
+//
+//              // shearing diag up right
+//              if (w_count < num_height_points - 1 && h_count < num_width_points - 1 && w_count % 2 != 0) {
+//                  springs.emplace_back(Spring(m1, m1 + 1 + num_width_points, SHEARING));
+//              }
+//
+//              // bending two to left
+//              if (h_count > 1) {
+//                  springs.emplace_back(Spring(m1, m1 - 2* num_width_points, BENDING));
+//              }
+//
+//              // bending ONE up {
+//              if (w_count < num_width_points - 1 && w_count % 2 != 0) {
+//                  springs.emplace_back(Spring(m1, m1 + 1, BENDING));
+//              }
+//          }
 
           // TUBE EXCEPTIONS
           // structural above
-          if (w_count == num_width_points - 1) {
-              springs.emplace_back(Spring(m1, &point_masses[h_count * num_height_points], STRUCTURAL));
-
-              // shearing diagonal up left
-              if (h_count > 0) {
-                  springs.emplace_back(Spring(m1, &point_masses[(h_count - 1) * num_height_points], SHEARING));
-              }
-
-//              // shearing diagonal up right
-              if (h_count < num_height_points - 1) {
-                  springs.emplace_back(Spring(m1, &point_masses[(h_count + 1) * num_height_points], SHEARING));
-              }
-
-              if (h_count < 2*num_height_points/3) {
-                  springs.emplace_back(Spring(m1, &point_masses[h_count * num_height_points + 1], BENDING));
-              } else if (w_count % 2 != 0) {
-                  springs.emplace_back(Spring(m1, &point_masses[h_count * num_height_points], BENDING));
-              }
-
-          } else if (w_count == num_width_points - 2) {
-              // bending up two
-              if (h_count < 2*num_height_points/3) {
-                  springs.emplace_back(Spring(m1, &point_masses[h_count * num_height_points], BENDING));
-              } else if (w_count % 2 != 0) {
-                  springs.emplace_back(Spring(m1, m1 + 1, BENDING));
-              }
-
-          }
+//          if (w_count == num_width_points - 1) {
+//              springs.emplace_back(Spring(m1, &point_masses[h_count * num_height_points], STRUCTURAL));
+//
+//              // shearing diagonal up left
+//              if (h_count > 0) {
+//                  springs.emplace_back(Spring(m1, &point_masses[(h_count - 1) * num_height_points], SHEARING));
+//              }
+//
+////              // shearing diagonal up right
+//              if (h_count < num_height_points - 1) {
+//                  springs.emplace_back(Spring(m1, &point_masses[(h_count + 1) * num_height_points], SHEARING));
+//              }
+//
+//              if (h_count < num_height_points/2) {
+//                  springs.emplace_back(Spring(m1, &point_masses[h_count * num_height_points + 1], BENDING));
+//              } else if (w_count % 2 != 0) {
+//                  springs.emplace_back(Spring(m1, &point_masses[h_count * num_height_points], BENDING));
+//              }
+//
+//          } else if (w_count == num_width_points - 2) {
+//              // bending up two
+//              if (h_count < num_height_points/2) {
+//                  springs.emplace_back(Spring(m1, &point_masses[h_count * num_height_points], BENDING));
+//              } else if (w_count % 2 != 0) {
+//                  springs.emplace_back(Spring(m1, m1 + 1, BENDING));
+//              }
+//
+//          }
 
       }
   }
@@ -351,7 +386,7 @@ void Cloth::buildClothMesh() {
 
   // Create vector of triangles
   for (int y = 0; y < num_height_points - 1; y++) {
-    for (int x = 0; x < num_width_points; x++) {
+    for (int x = 0; x < num_width_points - 1; x++) {
       PointMass *pm = &point_masses[y * num_width_points + x];
       // Get neighboring point masses:
       /*                      *
@@ -445,7 +480,7 @@ void Cloth::buildClothMesh() {
 
   // Convenient variables for math
   int num_height_tris = (num_height_points - 1) * 2;
-  int num_width_tris = (num_width_points) * 2;
+  int num_width_tris = (num_width_points - 1) * 2;
 
   bool topLeft = true;
   for (int i = 0; i < triangles.size(); i++) {
@@ -497,11 +532,8 @@ void Cloth::buildClothMesh() {
   }
 
   vector<Triangle*> new_tris;
-  for (int i = 0; i < 2*triangles.size() / 3; i++) {
-      new_tris.emplace_back(triangles[i]);
-  }
 
-  for (int j = 2*triangles.size() / 3 + 2; j < triangles.size() - 1; j+=4) {
+  for (int j = 2; j < triangles.size() - 1; j+=8) {
       new_tris.emplace_back(triangles[j]);
       new_tris.emplace_back(triangles[j + 1]);
   }
