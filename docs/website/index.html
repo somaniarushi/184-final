@@ -76,7 +76,8 @@
     <p>Moreover, we pin the first 10 "circles" (where h < 10) going up the cylinder to best model our fish wind sock</p>
     <!-- TODO: Streamers Construction -->
     <h3>Streamers Construction</h3>
-    <p>In order to simulate streamers we needed to essentially divide the mesh into two parts -- the first part is the tube and the second part is the streamers. Then, we edit spring creation by essentially skipping every row and delete triangles within those rows. We do this by TODO</p>
+    <p>In order to simulate streamers we needed to essentially divide the mesh into two parts -- the first part is the tube and the second part is the streamers. Then, we edit spring creation by essentially skipping every row and delete triangles within those rows. We do this by first converting all the x-y-z coordinates of the original cloth grid as described above, but also decrement the radius of the circle with each iteration of the circle to give a tapering off effect. Once we've decided on how long we want our streamers, we stop decrementing the radius of the cylinder being created (ie. 2/3 of the original width is a tapered tube, and the last 1/3 is held at constant radius)
+    For spring building, we loop through all the rows of the cylinder and create springs based on whether the rows/columns are even/odd (ie. structural left springs exist for all rows and columns, but structural above springs exist for every other row). That takes care of the wireframe mesh, but in order to make the streamers look plausible in shaders, we add an extra loop after the creation of all the triangles to only have the shader render and shade every other row of triangles after the cutoff point for the cylinder (ie. shade the first 2/3 of the width's triangles, but the last 1/3 should remove every other row of triangles).</p>
     <!-- TODO: GUI Addition
     - x, y, x –> apply specific force at direction
     -->
@@ -122,7 +123,7 @@
 
     <h2 align="middle">Reflection & Collaboration</h2>
     <p>Manaal worked on wind simulation and the physics behind the tube man! </p>
-    <p>Crystal worked on implementing streamers and editing the mesh to be a tube! </p>
+    <p>Crystal worked on implementing streamers and editing the mesh to be a tube, as well as the GUI for users to control wind speed! </p>
     <p>Arushi worked on tube point pinning, indexing, and spring exceptions </p>
     <p>Ashley worked on creating a skybox and texture files</p>
     <p>We all split up work on the project proposal, milestone, final presentation, and final writeup!</p>
