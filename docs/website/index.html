@@ -1,125 +1,128 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
-<head>
-    <style>
-        body {
-            padding: 100px;
-            width: 1000px;
-            margin: auto;
-            text-align: left;
-            font-weight: 300;
-            font-family: 'Open Sans', sans-serif;
-            color: #121212;
-            cursor: url(https://cdn.custom-cursor.com/db/8356/32/cute-potato-cursor.png) , default!important;
-            cursor: url(https://cdn.custom-cursor.com/db/8355/32/cute-potato-pointer.png) , pointer!important;
-        }
+    <head>
+        <style>
+            body {
+                padding: 100px;
+                width: 1000px;
+                margin: auto;
+                text-align: left;
+                font-weight: 300;
+                font-family: 'Open Sans', sans-serif;
+                color: #121212;
+                cursor: url(https://cdn.custom-cursor.com/db/8356/32/cute-potato-cursor.png) , default!important;
+                cursor: url(https://cdn.custom-cursor.com/db/8355/32/cute-potato-pointer.png) , pointer!important;
+            }
 
-        figcaption{
-            margin-right: 7vw;
-        }
+            figcaption{
+                margin-right: 7vw;
+            }
 
-        h1,
-        h2,
-        h3,
-        h4 {
-            font-family: 'Source Sans Pro', sans-serif;
-        }
+            h1,
+            h2,
+            h3,
+            h4 {
+                font-family: 'Source Sans Pro', sans-serif;
+            }
 
-        table{
-            margin-left: 3vw;
-        }
-        div.padded {
-            padding-top: 0px;
-            padding-right: 100px;
-            padding-bottom: 0.25in;
-            padding-left: 100px;
-        }
-    </style>
-    <title>Windsock | CS 184 Final Project Report</title>
-    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
-    <link href="https://fonts.googleapis.com/css?family=Open+Sans|Source+Sans+Pro" rel="stylesheet">
-    <!--<link rel="stylesheet" type="text/css" href="style.css" media="screen" />-->
-</head>
-<body>
-<div align="center" style="margin:0; padding:0; display: flex;">
-    <img src="images/spheres.png" align="middle" style="margin-left:auto; margin-right:auto; display:block; width: 200px;" alt="task1 summary" />
-    <img src="images/spheres64.png" align="middle" style="margin-left:auto; margin-right:auto; display:block; width: 200px;" alt="task1 summary" />
-    <img src="images/bunny5.png" align="middle" style="margin-left:auto; margin-right:auto; display:block; width: 200px;" alt="task1 summary" />
-</div>
+            table{
+                margin-left: 3vw;
+            }
+            div.padded {
+                padding-top: 0px;
+                padding-right: 100px;
+                padding-bottom: 0.25in;
+                padding-left: 100px;
+            }
+        </style>
+        <title>Windsock | CS 184 Final Project Report</title>
+        <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+        <link href="https://fonts.googleapis.com/css?family=Open+Sans|Source+Sans+Pro" rel="stylesheet">
+        <!--<link rel="stylesheet" type="text/css" href="style.css" media="screen" />-->
+    </head>
+    <body>
+        <div align="center" style="margin:0; padding:0; display: flex;">
+            <img src="images/spheres.png" align="middle" style="margin-left:auto; margin-right:auto; display:block; width: 200px;" alt="task1 summary" />
+            <img src="images/spheres64.png" align="middle" style="margin-left:auto; margin-right:auto; display:block; width: 200px;" alt="task1 summary" />
+            <img src="images/bunny5.png" align="middle" style="margin-left:auto; margin-right:auto; display:block; width: 200px;" alt="task1 summary" />
+        </div>
 
-<br />
-<h1 align="middle">CS184: Computer Graphics & Imaging | Spring 2022</h1>
-<h1 align="middle">Final Project Report</h1>
-<h4 align="middle">Team Members: Crystal Wang (TBD), Arushi Somani (TBD), Ashley Chu (3034858776), Manaal Siddqui (3034654585)</h4>
+        <br />
+        <h1 align="middle">CS184: Computer Graphics & Imaging | Spring 2022</h1>
+        <h1 align="middle">Final Project Report</h1>
+        <h4 align="middle">Team Members: Crystal Wang (3034709952), Arushi Somani (3034899544), Ashley Chu (3034858776), Manaal Siddqui (3034654585)</h4>
 
-<h2 align="middle">Link to video presentation: <a href="">Video Link</a></h2>
+        <h2 align="middle">Link to video presentation: <a href="">Video Link</a></h2>
 
-<!--EMBED VIDEO HERE VIA YOUTUBE-->
-<h2 align="middle">Abstract</h2>
+        <!--EMBED VIDEO HERE VIA YOUTUBE-->
+        <h2 align="middle">Abstract</h2>
 
-<!-- TODO: Summary -->
+        <p></p>
 
-<div class="padded">
-    <hr>
-    <h2 align="middle">Technical Approach</h2>
+        <!-- TODO: Summary -->
 
-    <!-- TODO: Wind Simulation-->
-    <h3>Wind Simulation</h3>
+        <div class="padded">
+            <hr>
+            <h2 align="middle">Technical Approach</h2>
 
-    <!-- TODO: Tube-Mesh Construction -->
-    <h3>Tube-Mesh Construction</h3>
+            <!-- TODO: Wind Simulation-->
+            <h3>Wind Simulation</h3>
 
-    <!-- TODO: Streamers Construction -->
-    <h3>Streamers Construction</h3>
+            <!-- TODO: Tube-Mesh Construction -->
+            <h3>Tube-Mesh Construction</h3>
 
-    <!-- TODO: GUI Addition
-    - x, y, x –> apply specific force at direction
-    -->
-    <h3>GUI Additions</h3>
+            <!-- TODO: Streamers Construction -->
+            <h3>Streamers Construction</h3>
 
-
-
-    <!-- TODO: Skybox + Illustrator -->
-    <h3>Additional Details</h3>
-
-    <!--
-    Discriminant
-    -->
-
-    <hr>
-    <h2 align="middle">Intermediate Results</h2>
-
-    <hr>
-
-    <!-- TODO: Snapshots of mid-point results -->
-
-    <h2 align="middle">Challenges</h2>
-
-    <hr>
-
-    <h2 align="middle">Keytakeaways</h2>
+            <!-- TODO: GUI Addition
+            - x, y, x –> apply specific force at direction
+            -->
+            <h3>GUI Additions</h3>
 
 
-    <hr>
 
-    <h2 align="middle">Final Results</h2>
+            <!-- TODO: Skybox + Illustrator -->
+            <h3>Additional Details</h3>
 
-    <div align="center">
-        <img src="images/part5/sp_rate.png" align="middle" style="margin-left:auto; margin-right:auto; display:block; width: 400px;" alt="task1 summary" />
-        <p>Example of CBbunny.dae with uniform sampling</p>
-    </div>
+            <!--
+            Discriminant
+            -->
 
-    <hr>
+            <hr>
+            <h2 align="middle">Intermediate Results</h2>
 
-    <h2 align="middle">Reflection & Collaboration</h2>
-    <div align="center">
-        <img src="images/team.png" align="middle" style="margin-left:auto; margin-right:auto; display:block; width: 400px;" alt="Team photo" />
-        <p>Windsock team!</p>
-    </div>
+            <hr>
 
-    <p>To view this as a website, please visit: <a href="https://ashchu.github.io/cs184proj3-1">https://ashchu.github.io/cs184proj3-1</a></p>
-</div>
-</body>
+            <!-- TODO: Snapshots of mid-point results -->
+
+            <h2 align="middle">Challenges</h2>
+
+            <hr>
+
+            <h2 align="middle">Keytakeaways</h2>
+
+
+            <hr>
+
+            <h2 align="middle">Final Results</h2>
+
+            <div align="center">
+                <img src="images/part5/sp_rate.png" align="middle" style="margin-left:auto; margin-right:auto; display:block; width: 400px;" alt="task1 summary" />
+                <p>Example of CBbunny.dae with uniform sampling</p>
+            </div>
+
+            <hr>
+
+            <h2 align="middle">Reflection & Collaboration</h2>
+            <div align="center">
+                <img src="images/team.png" align="middle" style="margin-left:auto; margin-right:auto; display:block; width: 400px;" alt="Team photo" />
+                <p>Windsock team!</p>
+            </div>
+
+            <p>To view this as a website, please visit: <a href="https://ashchu.github.io/cs184proj3-1">https://ashchu.github.io/cs184proj3-1</a></p>
+            <p>You can view our proposal and milestone at: <a href="https://somaniarushi.github.io/184-final/">https://somaniarushi.github.io/184-final/</a></p>
+        </div>
+    </body>
 </html>
 
 
