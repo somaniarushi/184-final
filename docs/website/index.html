@@ -179,6 +179,17 @@
                     and loaded the cubemap images to create a new surrounding environment</p>
                 <p>The skybox also features a timing feature in which the background changes over time (and thus our windsock can travel to new places!)</p>
 
+                <h3>Additional Info for Tube-Man Construction: Constructing the Tube Mesh</h3>
+                <p>So…how does a tube man work? When the air speed within the tube decreases, pressure increases, causing the tube to expand and straighten. When the air speed increases, pressure decreases, causing folds or creases. But air particles are difficult to simulate. So is a physically accurate version of pressure. So instead we brainstormed an approach that would approximate this simulation through torque.
+<br>
+                    <br>
+                    We can model the movement through torque and apply it towards a rig of rods, each parametrized by a start and end pointmass and a pivot.
+<br>
+                    <br>
+                    If you look at a video of a tube man, you'll notice that there's a fold that pulses through different parts of the tube. So we're essentially trying to model that pulse movement with torque where the “fold angle” is defined by a pinned and unpinned rod (ie an axis and a pivot). As the fold goes up (or down) we pin in the opposite direction. When all the rods are pinned, then we can “flip” the direction and bring it down. Torque is proportional to the angle between the axis and the pivot and the forces currently acting on that point.
+<br>
+                    <br>
+                    We translated this to code by creating Rod objects, each with a start and end pointmass and a pivot. It included functions to calculate torque, angle, and other values we’d need to find force. Then we tried adding a vector of rods as a parameter to cloth (similar to how it’s done with springs), filling it during buildgrid(), and then editing simulate() to render that force. In simulate, we apply external forces to each of the endpoints on the rods like we do on the other pointmasses. After applying the spring correction forces, we calculate the wind forces acting on the points on the rods and add it to the pointmass parameters. We keep track of our direction, and depending on that, we iterate over the rods up or down. If the rod is pinned, then we calculate the torque and add it. We change the pivot point and axis according to whether we're going up or down. Based on them, we find the force on that pivot point, multiply it by the sin of the angle and the radius of the pivot (which is just h_inc). If we find that there are no unpinned rods in our loop, that means the fold has traversed the tube, and we need to go down. Then, we add the torque force found on all the points as we iterate over the point_masses and update their positions.</p>
 
                 <hr>
                 <h2 align="middle">Intermediate Results</h2>
@@ -258,14 +269,36 @@
 
                 <p>Here are the final results of our windsock simulation!</p>
 
-                <div align="center">
-                    <img src="bkgchange.gif">
-                    <img src="fishgif.gif">
-                </div>
+        <table>
+            <tr>
+                <td>
+                    <img src="bkgchange.gif" width="400px" alt="ks500%20p3">
+                    <p style="text-align: center">Final mesh representation with streamers!</p>
+                </td>
+                <td>
+                    <img src="fishgif.gif" width="400px" alt="ks5000%20p3">
+                    <p style="text-align: center">Windsock simulation – randomness in movement from wind input!</p>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <img src="gui.png" width="400px" alt="ks500%20p3">
+                    <p style="text-align: center">GUI wind values for x, y, and z wind forces.</p>
+                </td>
+                <td>
+                    <img src="meshtube.png" width="400px" alt="ks500%20p3">
+                    <p style="text-align: center">Full mesh with stick!</p>
+                </td>
+            </tr>
+        </table>
+
 
                 <hr>
 
                 <h2 align="middle">Reflection & Collaboration</h2>
+
+        <p>It was a pleasure to work together as a team, and though our inital dream of tube-man wasn't able to come into fruition, the journey to creating our wind-sock was a fun adventure! We haven't given up on our tube-man and plan to continue looking into the construction and simulation of tube-man after successfully creating our windsock after this course.</p>
+
                 <p>Manaal worked on wind simulation and the physics behind the tube man! Manaal also helped with the proposal, milestone, and final write-up documents, along with the milestone and final presentation video.</p>
                 <p>Crystal worked on implementing streamers and editing the mesh to be a tube, as well as the GUI for
                     users to control wind speed! Crystal also helped with the project proposal document and parts of the milestone and final write-up.</p>
