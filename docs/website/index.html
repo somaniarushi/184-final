@@ -3,12 +3,12 @@
     <head>
         <style>
             body {
-                padding: 100px;
+                padding-bottom: 50px;
                 width: 1000px;
                 margin: auto;
                 text-align: left;
                 font-weight: 300;
-                font-family: 'Open Sans', sans-serif;
+                font-family: 'Source Sans Pro', sans-serif;
                 color: #121212;
                 cursor: url(https://cdn.custom-cursor.com/db/8356/32/cute-potato-cursor.png) , default!important;
                 cursor: url(https://cdn.custom-cursor.com/db/8355/32/cute-potato-pointer.png) , pointer!important;
@@ -24,7 +24,6 @@
             h4 {
                 font-family: 'Source Sans Pro', sans-serif;
             }
-
             table{
                 margin-left: 3vw;
             }
@@ -34,6 +33,30 @@
                 padding-bottom: 0.25in;
                 padding-left: 100px;
             }
+            .titlepage {
+                /*background-color: black;*/
+                display: block;
+                margin-left: auto;
+                margin-right:auto;
+                /*width: 100%;*/
+                /*position: relative;*/
+                /*height: 60px;*/
+                /*z-index: 11;*/
+            }
+            .resource {
+                font-family: 'Montserrat', sans-serif;
+                line-height: 3.6;
+                margin: 20px 10px 40px 20px;
+            }
+            a {
+                text-decoration: none;
+                /*color: white;*/
+            }
+            #index {
+                font-family: 'Montserrat', sans-serif;
+                line-height: 3.6;
+                margin: 20px 10px 40px 40%;
+            }
         </style>
         <title>Windsock | CS 184 Final Project Report</title>
         <meta http-equiv="content-type" content="text/html; charset=utf-8" />
@@ -41,52 +64,53 @@
         <!--<link rel="stylesheet" type="text/css" href="style.css" media="screen" />-->
     </head>
     <body>
-        <div align="center" style="margin:0; padding:0; display: flex;">
-            <img src="images/spheres.png" align="middle" style="margin-left:auto; margin-right:auto; display:block; width: 200px;" alt="task1 summary" />
-            <img src="images/spheres64.png" align="middle" style="margin-left:auto; margin-right:auto; display:block; width: 200px;" alt="task1 summary" />
-            <img src="images/bunny5.png" align="middle" style="margin-left:auto; margin-right:auto; display:block; width: 200px;" alt="task1 summary" />
-        </div>
 
-        <br />
+    <header class="titlepage">
+        <a href="https://somaniarushi.github.io/184-final/proposal" onclick="opencity('Home')" id="index">Proposal</a>
+        <a href="https://somaniarushi.github.io/184-final/milestone" onclick="opencity('About')" class="resource">Milestone</a>
+        <a href="#" onclick="opencity('Resources')" class="resource">Final </a>
+    </header>
+
         <h1 align="middle">CS184: Computer Graphics & Imaging | Spring 2022</h1>
         <h1 align="middle">Final Project Report</h1>
-        <h4 align="middle">Team Members: Crystal Wang (3034709952), Arushi Somani (3034899544), Ashley Chu (3034858776), Manaal Siddqui (3034654585)</h4>
+        <p align="middle"><span style="font-weight: bold; text-decoration: underline">Team Members:</span> Crystal Wang (3034709952), Arushi Somani (3034899544), Ashley Chu (3034858776), Manaal Siddqui (3034654585)</p>
 
-        <h2 align="middle">Link to video presentation: <a href="">Video Link</a></h2>
-
+<!--        <h2 align="middle">Link to video presentation: <a href="">Video Link</a></h2>-->
+        <iframe width="560" height="315" src="https://www.youtube.com/embed/u6rrJVH75BE" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen style="display: block;margin-left: auto;margin-right: auto;"></iframe>
         <!--EMBED VIDEO HERE VIA YOUTUBE-->
         <h2 align="middle">Abstract</h2>
 
-        <p></p>
+    <div class = "padded">
+        <p>For our final project, our goal was to render a simulation of windsock movement in air based on wind-cloth physics principles. Building off of the infrastructure from Project 4, ClothSim, we added wind features, including a GUI that allows users to control the direction and speed of wind using x, y, and z dimensions. With polar coordinates and triangle sorting, we were able to create a tube-like mesh which forms the body of our windsock. We also added streamers to our mesh by dividing the tube into two core parts, head and streamers, and skipping over rows during triangulation to account for the division and separation of streamers.  For our windsock appearance, we created new textures using illutrator, and also implemented a Skybox for environment aesthetics. </p>
+    </div>
+    <div class="padded">
+    <hr>
+    <h2 align="middle">Technical Approach</h2>
+    <p>We started with our implementation from ClothSim, since we wanted to create an inflatable tube man. The ClothSim project provided a way to create a mesh and apply forces upon it, and we figured we could build on that to include wind and internal particle forces and pressure</p>
+    <h3>Wind Simulation</h3>
+    <p>The first part was creating wind! To do so, in cloth->simulate we build off of the loop from the previous project in which the point mass positions are updated at each time step. We use the point's velocity, find its normal with <code> pointMass.normal() </code>, set a wind strength constant C, and simply follow the formula below to calculate wind force. Then it's just a matter of adding it to <code> pointMass.forces</code> </p>
+    $$$F_{wind}(i,j) = C_{wind}[n_{i,j} * (v_{wind}-v_{i,j})]n_{i,j}$$
 
-        <!-- TODO: Summary -->
+    <h3>Tube-Mesh Construction</h3>
+    <p>This next part involved editing the buildGrid function so that the mesh that was created was cylindrical rather than flat and rectangular. We did this by using polar coordinates, essentially iterating over the height points and at each height, creating a circle. This meant creating a double nested for loop, with the first loop being over height points and the second being over angles between 0 and 2PI. Then we can create Point Masses at </p>
+    $$(x,y,z) = (h offset * h, r * sin(θ), r * cos(θ)) $$
+    <p>We also have to account for a weird error that came up in which the cylinder had almost an "arc" subsection missing, and we did this by accounting for the case that <code>angle >= 2 * PI - incr_amt + 1 </code>, in which case y is r * sin(0) + 0.0001 and z is r * cos(0) + 0.0001 so that it wraps around the cylinder enough to enclose it</p>
+    <p>Moreover, we pin the first 10 "circles" (where h < 10) going up the cylinder to best model our fish wind sock</p>
+    <!-- TODO: Streamers Construction -->
+    <h3>Streamers Construction</h3>
+    <p>In order to simulate streamers we needed to essentially divide the mesh into two parts -- the first part is the tube and the second part is the streamers. Then, we edit spring creation by essentially skipping every row and delete triangles within those rows. We do this by TODO</p>
+    <!-- TODO: GUI Addition
+    - x, y, x –> apply specific force at direction
+    -->
+    <h3>GUI Additions</h3>
+    <p>Damping, spring, and other constants are labelled within the GUI to make it user-interactive and able to change how the forces apply. We wanted to expand this to include our new wind simulation, so that the GUI has labels for the x, y, and z components of wind velocity/direction. we make a few changes in clothSimulator.cpp. We add wind in the vector of external_accelerations and create a label in the GUI that changes the x,y,and z components of wind with 3 different floatboxes. Then we edit cloth->simulate function to pull from external_accelerations the wind vector, which gets applied as was explained in the Wind Simulation section. </p>
 
-        <div class="padded">
-            <hr>
-            <h2 align="middle">Technical Approach</h2>
+    <!-- TODO: Skybox + Illustrator -->
+    <h3>Additional Details</h3>
+    <p>We also wanted to give some aesthetic quality to the wind sock. We created a texture file in Adobe Illustrator that was mapped over the mesh. </p>
+    <p>In addition, we added a pole so the wind sock is not flying in empty space. We did this by creating a very thin sphere in a sphere.json and positioning it with the sock</p>
+    <p>For the skybox, we added in texture files over the cube. we created new vertex and fragment shaders and loaded the cubemap images to create a new surrounding environment</p>
 
-            <!-- TODO: Wind Simulation-->
-            <h3>Wind Simulation</h3>
-
-            <!-- TODO: Tube-Mesh Construction -->
-            <h3>Tube-Mesh Construction</h3>
-
-            <!-- TODO: Streamers Construction -->
-            <h3>Streamers Construction</h3>
-
-            <!-- TODO: GUI Addition
-            - x, y, x –> apply specific force at direction
-            -->
-            <h3>GUI Additions</h3>
-
-
-
-            <!-- TODO: Skybox + Illustrator -->
-            <h3>Additional Details</h3>
-
-            <!--
-            Discriminant
-            -->
 
             <hr>
             <h2 align="middle">Intermediate Results</h2>
@@ -95,14 +119,19 @@
 
             <!-- TODO: Snapshots of mid-point results -->
 
-            <h2 align="middle">Challenges</h2>
+    <h2 align="middle">Challenges</h2>
+    <p>We encountered a lot of challenges, from infinite loops to segfaults to git issues to physics concepts and all in between </p>
+    <li> One challenge we had was figuring out how the physics of a tube man would work if we wanted it to look realistic. None of us knew particle physics (or were otherwise adept at physics), and it wasn't something that had been done before. There wasn't any projects we could draw inspiration from to build something like that. It took a lot of head-scratching to figure out an idea of how to make an illusion of real physics -- through a tube man representation as a series of rods and its changes in internal pressure and external movement as a result of torque between those rods. When pressure decreases, tube man should bend. We didn't know how to simulate pressure variance through code, so we thought about an idea where we just calculate torque using forces already acting on the tube man (ie gravity and wind) except on rods and then pinning and unpinning rods as a crease would go up and down a tube man. However, when we tried to build this, it didn't work out well. There were issues with segfaults and infinite loops and overall the physics was still a little fuzzy. So we decided it was better to pivot</li>
+    <li> Another challenge we had was enclosing the cylinder. In creating our pointmasses, there was an arc of the cylinder that was missing -- we used modular arithmetic to close it up. </li>
+    <li> We also had trouble with the streamers. since we had to create springs for every other row, it was tricky to implement and required a lot of experimentation before we got it right. We also had to account for deleting triangle within those rows. It was especially challenging since we hadn't in the past had experience with cutouts in meshes, or a .dae to go off of.</li>
+    <li>Finally, it was challenging to navigate CMake and git. CMakeLists was causing issues between our different machines in builds. Even when we got the builds to run, the outputs would often be different -- so it didn't work on all of our machines. .gitignore also caused issues. All of this combined to require us to navigate copy and pasting src folders between our local versions, cloning and recloning endlessly, creating a bunch of branches, merging to try to fix things, etc </li>
+    <hr>
 
-            <hr>
-
-            <h2 align="middle">Keytakeaways</h2>
-
-
-            <hr>
+    <h2 align="middle">Keytakeaways</h2>
+    <li>One of our key takeaways was that modelling physics is really hard. We were flying blind when it came to modelling tube man. You have to consider -- what forces does this require? What assumptions should we make? What can we abstract away? One crucial thing we learned was to account for our conceptual gaps. It's not really sustainable to jump from 0 to 100, and it's better to build off what we know or what we can draw inspiration from through past projects and other people's research or papers. That doesn't mean to just not try new things -- it means to be mindful of the limits we have, whether it be time or resources to help guide us and gradually build it up. </li>
+    <li>Another key takeaway we learned was understanding when you  need to pivot. We had a lot of lofty goals, but not a lot of time, and physics understanding, and although the concept of a tube man was really exciting to us, we learned that sometimes, it's better to take a step back and reassess realistically. In the real world this is really important. Until now, we've had the benefit of everyone working on the same project and being able to get support easily because of it. But in the real world, especially when innovating entirely new things, we're not going to have that privilege all the time. Understanding a team or your own strengths and weaknesses is hugely important in understanding what you are capable of. Pivoting also means figuring out how to use the working parts of what you have and understand into something that's more sustainable</li>
+    <li>We also learned how to play around with GUIs, and be able to balance aesthetic at the same time as we do functionality. </li>
+        <hr>
 
             <h2 align="middle">Final Results</h2>
 
@@ -112,19 +141,22 @@
             </div>
 
             <hr>
-
-            <h2 align="middle">Reflection & Collaboration</h2>
-            <div align="center">
-                <img src="images/team.png" align="middle" style="margin-left:auto; margin-right:auto; display:block; width: 400px;" alt="Team photo" />
-                <p>Windsock team!</p>
-            </div>
+    <h2 align="middle">Reflection & Collaboration</h2>
+    <p>Manaal worked on wind simulation and breaking down the initial physics behind the tube man. </p>
+    <p>Crystal worked on implementing streamers and editing the mesh to be a tube. She also explored additional options like confetti and help set up the GUI</p>
+    <p>Arushi worked on tube point pinning, indexing, and spring exceptions. </p>
+    <p>Ashley worked on creating a skybox and texture files. </p>
+    <p>We all split up work on the project proposal, milestone, final presentation, and final writeup!</p>
+    <div align="center">
+        <img src="images/team.png" align="middle" style="margin-left:auto; margin-right:auto; display:block; width: 400px;" alt="Team photo" />
+        <p>Windsock team!</p>
+    </div>
 
             <p>To view this as a website, please visit: <a href="https://ashchu.github.io/cs184proj3-1">https://ashchu.github.io/cs184proj3-1</a></p>
             <p>You can view our proposal and milestone at: <a href="https://somaniarushi.github.io/184-final/">https://somaniarushi.github.io/184-final/</a></p>
         </div>
     </body>
 </html>
-
 
 
 
