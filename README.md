@@ -1,4 +1,6 @@
 # Animating an Inflatable Tube Man
+Made for CS184 at UC Berkeley, Fall 2022.
+
 ![inflatableman](https://user-images.githubusercontent.com/54224195/232920651-cdef19f9-f1ca-4262-a6d3-3f5cae416a26.gif)
 
 In researching this idea, we noticed that the inflatable tube man posed an interesting challenge in combining particle physics and material modelling. We have yet to find anything that contributes to such a field, and we’d like to test the interplay between the two in our project.
